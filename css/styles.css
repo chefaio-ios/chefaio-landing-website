@@ -324,23 +324,29 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .blob-gray {
   left: 50%;
-  top: 4%;
-  margin-left: -220px;
+  top: 2%;
+  margin-left: -210px;
+  width: 370px;
+  height: 378px;
+  max-width: 96%;
+  max-height: 96%;
   opacity: 0.5;
   z-index: 0;
-  transform: rotate(-24deg);
-  width: min(400px, 96%);
-  height: min(400px, 96%);
+  transform: rotate(-40deg);
+  transform-origin: center center;
 }
 .blob-navy {
   left: 50%;
-  top: 12%;
-  margin-left: -160px;
+  top: 10%;
+  margin-left: -150px;
+  width: 370px;
+  height: 378px;
+  max-width: 90%;
+  max-height: 90%;
   opacity: 1;
   z-index: 0;
-  transform: rotate(16deg);
-  width: min(360px, 88%);
-  height: min(360px, 88%);
+  transform: rotate(-16deg);
+  transform-origin: center center;
 }
 .phone {
   position: relative;
@@ -413,22 +419,27 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .feature-media .blob-gray {
   left: 50%;
-  top: 2%;
+  top: 0%;
   margin-left: -210px;
+  width: 370px;
+  height: 378px;
+  max-width: 110%;
+  max-height: 110%;
   opacity: 0.5;
-  transform: rotate(-24deg);
-  width: min(400px, 105%);
-  height: min(400px, 105%);
+  transform: rotate(-40deg);
+  transform-origin: center center;
 }
 .feature-media .blob-navy {
   left: 50%;
-  top: 10%;
+  top: 8%;
   margin-left: -150px;
-  right: auto;
-  bottom: auto;
-  transform: rotate(18deg);
-  width: min(350px, 95%);
-  height: min(350px, 95%);
+  width: 370px;
+  height: 378px;
+  max-width: 100%;
+  max-height: 100%;
+  opacity: 1;
+  transform: rotate(-16deg);
+  transform-origin: center center;
 }
 .feature-media .phone { width: 250px; max-width: 75%; }
 .feature-float {
@@ -592,20 +603,25 @@ ul { margin: 0; padding: 0; list-style: none; }
   left: 50%;
   top: 0%;
   margin-left: -210px;
+  width: 370px;
+  height: 378px;
+  max-width: 110%;
+  max-height: 110%;
   opacity: 0.5;
-  transform: rotate(-24deg);
-  width: min(400px, 105%);
-  height: min(400px, 105%);
+  transform: rotate(-40deg);
+  transform-origin: center center;
 }
 .download-visual .blob-navy {
   left: 50%;
   top: 8%;
   margin-left: -150px;
-  right: auto;
-  bottom: auto;
-  transform: rotate(18deg);
-  width: min(350px, 95%);
-  height: min(350px, 95%);
+  width: 370px;
+  height: 378px;
+  max-width: 100%;
+  max-height: 100%;
+  opacity: 1;
+  transform: rotate(-16deg);
+  transform-origin: center center;
 }
 .download-visual .phone { width: 250px; max-width: 70%; }
 .download-visual .feature-float {
