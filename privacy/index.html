@@ -8,31 +8,36 @@
   <link rel="icon" href="../assets/favicon.ico" sizes="any">
   <link rel="icon" href="../assets/favicon.webp" type="image/webp">
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="container header-inner">
+    <header class="site-header">
+    <div class="header-inner">
       <a class="logo" href="../index.html">Rivex</a>
-      <div class="header-right">
-        <nav class="nav" id="site-nav" aria-label="Primary">
-          <a href="../index.html#features">Features</a>
-          <a href="../index.html#how-it-works">How it works</a>
-          <a href="../index.html#download">Download</a>
-          <a class="btn-download mobile-only" href="https://apps.apple.com/app/rivex/id6752362984" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Download</a>
-        </nav>
-        <div class="header-actions">
-          <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
-            <span></span><span></span><span></span>
-          </button>
-          <a class="btn-download desktop-only" href="https://apps.apple.com/app/rivex/id6752362984" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Download</a>
-        </div>
+      <div class="header-actions">
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+        <a class="btn-download" href="https://apps.apple.com/app/rivex/id6752362984" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="btn-label">Download</span>
+        </a>
       </div>
     </div>
   </header>
+
+  <div class="nav-overlay" id="nav-overlay" hidden></div>
+  <nav class="nav-drawer" id="site-nav" aria-label="Primary" hidden>
+    <button class="nav-close" type="button" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <a href="../index.html">Rivex</a>
+    <a href="../index.html#features">Features</a>
+    <a href="../index.html#how-it-works">How it work</a>
+    <a href="../index.html#download">Download</a>
+    <a href="../privacy/" class="is-active" aria-current="page">Privacy Policy</a>
+    <a href="../tos/">Terms of Service</a>
+  </nav>
 
   <main class="legal-main">
     <div class="legal-wrap">
@@ -108,21 +113,51 @@ word-break: break-word !important;
       </div>
     </div>
   </footer>
-  <script>
+    <script>
     (function () {
       var toggle = document.querySelector('.nav-toggle');
+      var closeBtn = document.querySelector('.nav-close');
       var nav = document.getElementById('site-nav');
-      if (!toggle || !nav) return;
-      toggle.addEventListener('click', function () {
-        var open = nav.classList.toggle('open');
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-      });
-      nav.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', function () {
-          nav.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
+      var overlay = document.getElementById('nav-overlay');
+      if (!toggle || !nav || !overlay) return;
+
+      function openMenu() {
+        nav.hidden = false;
+        overlay.hidden = false;
+        requestAnimationFrame(function () {
+          nav.classList.add('open');
+          overlay.classList.add('open');
         });
+        document.body.classList.add('menu-open');
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.setAttribute('aria-label', 'Close menu');
+      }
+      function closeMenu() {
+        nav.classList.remove('open');
+        overlay.classList.remove('open');
+        document.body.classList.remove('menu-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Open menu');
+        setTimeout(function () {
+          if (!nav.classList.contains('open')) {
+            nav.hidden = true;
+            overlay.hidden = true;
+          }
+        }, 350);
+      }
+      function toggleMenu() {
+        if (nav.classList.contains('open')) closeMenu();
+        else openMenu();
+      }
+
+      toggle.addEventListener('click', toggleMenu);
+      if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+      overlay.addEventListener('click', closeMenu);
+      nav.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', closeMenu);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && nav.classList.contains('open')) closeMenu();
       });
     })();
   </script>
