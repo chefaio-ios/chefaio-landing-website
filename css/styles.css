@@ -57,6 +57,10 @@ ul { margin: 0; padding: 0; list-style: none; }
   right: 0;
   z-index: 200;
   height: var(--header-h);
+  /* Transparent over the pale hero; solid white once scrolled (matches Wix) */
+  background: transparent;
+}
+.site-header.is-solid {
   background: var(--white);
 }
 .header-inner {
@@ -255,9 +259,10 @@ ul { margin: 0; padding: 0; list-style: none; }
 .pill-icon {
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--navy);
   flex-shrink: 0;
+  transform: rotate(-16deg);
 }
 
 /* ========== Hero ========== */

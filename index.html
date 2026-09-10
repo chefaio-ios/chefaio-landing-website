@@ -254,6 +254,15 @@
         if (e.key === 'Escape' && nav.classList.contains('open')) closeMenu();
       });
     })();
+    (function () {
+      var header = document.querySelector('.site-header');
+      if (!header) return;
+      function syncHeader() {
+        header.classList.toggle('is-solid', window.scrollY > 8);
+      }
+      syncHeader();
+      window.addEventListener('scroll', syncHeader, { passive: true });
+    })();
   </script>
 </body>
 </html>
