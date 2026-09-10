@@ -167,7 +167,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: flex;
   flex-direction: column;
   padding: 40px;
-  text-align: right;
+  text-align: left;
   transform: translateX(100%);
   visibility: hidden;
   pointer-events: none;
@@ -419,6 +419,12 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .feature-float.right { right: -4%; bottom: 10%; }
 .feature-float.left { left: -4%; bottom: 8%; }
+.feature-card.reverse .feature-float.left {
+  left: auto;
+  right: -8%;
+  top: 28%;
+  bottom: auto;
+}
 .feature-text h3 {
   font-size: 1.55rem;
   letter-spacing: normal;
@@ -443,12 +449,11 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .feature-list li::before {
   content: "";
-  width: 8px;
-  height: 8px;
-  margin-top: 0.5rem;
-  border-radius: 50%;
-  background: var(--navy);
+  width: 15px;
+  height: 15px;
+  margin-top: 0.3rem;
   flex-shrink: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='19.999 35.501 160.001 128.999'%3E%3Cpath fill='%23010C23' d='M177.804 52.827L76.192 161.956c-3.063 3.257-8.188 3.404-11.443.34L22.55 122.609c-3.257-3.032-3.417-8.175-.353-11.432l4.869-6.109c3.06-3.287 8.154-3.432 11.443-.353l32.622 29.803 90.834-95.868c3.06-3.277 7.345-4.706 11.604-.76l3.883 3.54c3.252 3.029 3.415 8.142.352 11.397z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 @media (max-width: 800px) {
@@ -559,8 +564,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .download-visual .phone { width: 250px; max-width: 70%; }
 .download-visual .feature-float {
-  right: 2%;
-  bottom: 18%;
+  right: -6%;
+  top: 32%;
+  bottom: auto;
   width: 200px;
 }
 .download-copy h2 {
