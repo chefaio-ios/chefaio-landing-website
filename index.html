@@ -58,9 +58,7 @@
           </div>
         </div>
       </div>
-      <div class="cloud-divider" aria-hidden="true">
-        <img src="assets/wix-cloud-1.svg" alt="" width="1920" height="271">
-      </div>
+      <div class="cloud-divider" aria-hidden="true"></div>
     </section>
 
     <section class="features" id="features" aria-labelledby="features-heading">
@@ -99,7 +97,6 @@
               <img src="assets/phone-running.png" alt="Rivex running task monitor on iPhone" width="250" height="499">
             </div>
             <img class="feature-float left" src="assets/detail-activity.png" alt="" width="225" height="216">
-            <img class="feature-float top-right" src="assets/detail-running.png" alt="" width="140" height="152">
           </div>
           <div class="feature-text">
             <span class="pill"><span class="pill-icon" aria-hidden="true"></span> Key features</span>
@@ -134,9 +131,7 @@
           </div>
         </article>
       </div>
-      <div class="cloud-divider" aria-hidden="true">
-        <img src="assets/wix-cloud-2.svg" alt="" width="1920" height="271">
-      </div>
+      <div class="cloud-divider" aria-hidden="true"></div>
     </section>
 
     <section class="how" id="how-it-works" aria-labelledby="how-heading">
@@ -175,9 +170,7 @@
           </div>
         </div>
       </div>
-      <div class="cloud-divider" aria-hidden="true">
-        <img src="assets/wix-cloud-3.svg" alt="" width="1920" height="271">
-      </div>
+      <div class="cloud-divider" aria-hidden="true"></div>
     </section>
 
     <section class="download" id="download" aria-labelledby="download-heading">
@@ -188,7 +181,7 @@
           <div class="phone">
             <img src="assets/phone-tasks.png" alt="" width="250" height="499">
           </div>
-          <img class="feature-float right" src="assets/detail-running.png" alt="" width="200" height="218">
+          <img class="feature-float right" src="assets/detail-running.png" alt="" width="225" height="245">
         </div>
         <div class="download-copy">
           <span class="pill"><span class="pill-icon" aria-hidden="true"></span> Download</span>
@@ -199,9 +192,7 @@
           </a>
         </div>
       </div>
-      <div class="cloud-divider cloud-divider--footer" aria-hidden="true">
-        <img src="assets/wix-cloud-4.svg" alt="" width="1920" height="271">
-      </div>
+      <div class="cloud-divider cloud-divider--footer" aria-hidden="true"></div>
     </section>
   </main>
 
@@ -262,6 +253,15 @@
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && nav.classList.contains('open')) closeMenu();
       });
+    })();
+    (function () {
+      var header = document.querySelector('.site-header');
+      if (!header) return;
+      function syncHeader() {
+        header.classList.toggle('is-solid', window.scrollY > 8);
+      }
+      syncHeader();
+      window.addEventListener('scroll', syncHeader, { passive: true });
     })();
   </script>
 </body>
