@@ -59,9 +59,11 @@ ul { margin: 0; padding: 0; list-style: none; }
   height: var(--header-h);
   /* Transparent over the pale hero; solid white once scrolled (matches Wix) */
   background: transparent;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .site-header.is-solid {
   background: var(--white);
+  box-shadow: 0 1px 0 rgba(1, 12, 35, 0.06);
 }
 .header-inner {
   display: flex;
@@ -333,11 +335,13 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .blob-gray {
   opacity: 0.5;
-  transform: translate(-50%, -50%) rotate(-40deg);
+  transform: translate(-50%, -50%) rotate(-40deg) translateY(var(--parallax-y, 0px));
+  will-change: transform;
 }
 .blob-navy {
   opacity: 1;
-  transform: translate(-50%, -50%) rotate(-16deg);
+  transform: translate(-50%, -50%) rotate(-16deg) translateY(var(--parallax-y, 0px));
+  will-change: transform;
 }
 .hero-visual .blob {
   width: 70%;
@@ -349,6 +353,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   z-index: 1;
   width: min(270px, 70%);
   filter: drop-shadow(0 25px 50px rgba(1, 12, 35, 0.25));
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  will-change: transform;
 }
 .phone img { width: 100%; border-radius: 28px; }
 
@@ -425,6 +431,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   box-shadow: 0 12px 40px rgba(1, 12, 35, 0.18);
   z-index: 2;
   background: var(--white);
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  will-change: transform;
 }
 .feature-float.right { right: -4%; bottom: 10%; }
 .feature-float.left { left: -4%; bottom: 8%; }
@@ -501,6 +509,8 @@ ul { margin: 0; padding: 0; list-style: none; }
   width: min(270px, 55vw);
   justify-self: center;
   filter: drop-shadow(0 20px 40px rgba(1, 12, 35, 0.18));
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  will-change: transform;
 }
 .how-phone img { border-radius: 28px; width: 100%; }
 
@@ -550,6 +560,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .download {
   background: var(--pale);
   padding: 6rem 0 0;
+  overflow: visible;
 }
 .download-grid {
   display: grid;
@@ -557,6 +568,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   gap: 2.5rem;
   align-items: center;
   padding-bottom: 4.5rem;
+  overflow: visible;
 }
 .download-visual {
   position: relative;
@@ -564,7 +576,9 @@ ul { margin: 0; padding: 0; list-style: none; }
   justify-content: center;
   min-height: 480px;
   align-items: flex-end;
-  overflow-x: clip;
+  overflow: visible;
+  padding-right: 2.5rem;
+  min-width: 0;
 }
 .download-visual .blob {
   width: 110%;
@@ -573,7 +587,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .download-visual .phone { width: 250px; max-width: 70%; }
 .download-visual .feature-float {
-  right: -6%;
+  right: 4%;
   top: 26%;
   bottom: auto;
   width: 225px;
@@ -697,6 +711,16 @@ ul { margin: 0; padding: 0; list-style: none; }
   font-size: 0.9rem;
 }
 .back-home:hover { color: var(--navy); }
+
+@media (prefers-reduced-motion: reduce) {
+  .blob-gray,
+  .blob-navy,
+  .phone,
+  .feature-float,
+  .how-phone {
+    will-change: auto;
+  }
+}
 
 .sr-only {
   position: absolute;
