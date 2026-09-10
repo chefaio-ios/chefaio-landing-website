@@ -137,16 +137,18 @@ ul { margin: 0; padding: 0; list-style: none; }
   .btn-download .btn-label { display: none; }
 }
 
-/* ========== Full-viewport drawer ========== */
+/* ========== Mobile nav drawer (right panel + dim overlay) ========== */
 .nav-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(1, 12, 35, 0.45);
+  width: 100vw;
+  height: 100vh;
+  background: rgba(1, 12, 35, 0.85);
   z-index: 300;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 .nav-overlay.open {
   opacity: 1;
@@ -155,22 +157,27 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .nav-drawer {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 400px;
+  height: 100vh;
   z-index: 310;
-  background: var(--white);
+  background: #FFFFFF;
   display: flex;
   flex-direction: column;
-  padding: 28px 40px 40px;
+  padding: 40px;
+  text-align: right;
   transform: translateX(100%);
-  opacity: 0;
   visibility: hidden;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.645, 0.045, 0.355, 1), visibility 0.4s ease;
   overflow-y: auto;
 }
 .nav-drawer.open {
   transform: translateX(0);
-  opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 .nav-close {
   align-self: flex-end;
