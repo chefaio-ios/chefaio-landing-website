@@ -219,8 +219,19 @@ ul { margin: 0; padding: 0; list-style: none; }
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
-  object-position: bottom center;
+  object-fit: fill; /* stretch full width — no side crop on wide screens */
+  object-position: center bottom;
+}
+/* Seam fix: last cloud (navy) meets footer — no white hairline */
+.cloud-divider--footer {
+  background: linear-gradient(to bottom, transparent 0%, transparent 70%, #010C23 70%, #010C23 100%);
+  margin-bottom: -2px;
+  position: relative;
+  z-index: 1;
+}
+.cloud-divider--footer img {
+  position: relative;
+  z-index: 1;
 }
 
 /* ========== Pills ========== */
@@ -293,35 +304,43 @@ ul { margin: 0; padding: 0; list-style: none; }
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  min-height: 480px;
+  min-height: 520px;
   padding-bottom: 0;
+  overflow: visible;
 }
 .blob {
   position: absolute;
   z-index: 0;
   pointer-events: none;
   user-select: none;
+  width: min(380px, 92%);
+  height: min(380px, 92%);
 }
 .blob img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: fill;
+  display: block;
 }
 .blob-gray {
-  width: 62%;
-  height: 68%;
-  left: 2%;
-  top: 6%;
+  left: 50%;
+  top: 4%;
+  margin-left: -220px;
   opacity: 0.5;
-  transform: rotate(-18deg) scale(1.15, 1.35);
+  z-index: 0;
+  transform: rotate(-24deg);
+  width: min(400px, 96%);
+  height: min(400px, 96%);
 }
 .blob-navy {
-  width: 68%;
-  height: 78%;
-  right: 0;
-  bottom: 4%;
+  left: 50%;
+  top: 12%;
+  margin-left: -160px;
   opacity: 1;
-  transform: rotate(12deg) scale(1.2, 1.4);
+  z-index: 0;
+  transform: rotate(16deg);
+  width: min(360px, 88%);
+  height: min(360px, 88%);
 }
 .phone {
   position: relative;
@@ -385,23 +404,31 @@ ul { margin: 0; padding: 0; list-style: none; }
   justify-content: center;
   align-items: center;
   min-height: 480px;
+  overflow: visible;
+}
+.feature-media .blob {
+  width: min(360px, 95%);
+  height: min(360px, 95%);
+  margin-left: 0;
 }
 .feature-media .blob-gray {
-  width: 70%;
-  height: 75%;
-  left: 0;
-  top: 8%;
+  left: 50%;
+  top: 2%;
+  margin-left: -210px;
   opacity: 0.5;
-  transform: rotate(-22deg) scale(1.2, 1.35);
+  transform: rotate(-24deg);
+  width: min(400px, 105%);
+  height: min(400px, 105%);
 }
 .feature-media .blob-navy {
-  width: 65%;
-  height: 72%;
-  right: 5%;
-  bottom: 5%;
-  left: auto;
-  top: auto;
-  transform: rotate(16deg) scale(1.15, 1.3);
+  left: 50%;
+  top: 10%;
+  margin-left: -150px;
+  right: auto;
+  bottom: auto;
+  transform: rotate(18deg);
+  width: min(350px, 95%);
+  height: min(350px, 95%);
 }
 .feature-media .phone { width: 250px; max-width: 75%; }
 .feature-float {
@@ -539,7 +566,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 .download {
   background: var(--pale);
   padding: 6rem 0 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 .download-grid {
   display: grid;
@@ -552,24 +580,32 @@ ul { margin: 0; padding: 0; list-style: none; }
   position: relative;
   display: flex;
   justify-content: center;
-  min-height: 460px;
+  min-height: 480px;
   align-items: flex-end;
+  overflow: visible;
+}
+.download-visual .blob {
+  width: min(360px, 95%);
+  height: min(360px, 95%);
 }
 .download-visual .blob-gray {
-  width: 70%;
-  height: 78%;
-  left: 0;
-  top: 5%;
+  left: 50%;
+  top: 0%;
+  margin-left: -210px;
   opacity: 0.5;
-  transform: rotate(-20deg) scale(1.2, 1.35);
+  transform: rotate(-24deg);
+  width: min(400px, 105%);
+  height: min(400px, 105%);
 }
 .download-visual .blob-navy {
-  width: 68%;
-  height: 80%;
-  left: 18%;
+  left: 50%;
+  top: 8%;
+  margin-left: -150px;
   right: auto;
-  bottom: 0;
-  transform: rotate(10deg) scale(1.15, 1.35);
+  bottom: auto;
+  transform: rotate(18deg);
+  width: min(350px, 95%);
+  height: min(350px, 95%);
 }
 .download-visual .phone { width: 250px; max-width: 70%; }
 .download-visual .feature-float {
@@ -602,10 +638,13 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 /* ========== Footer ========== */
 .site-footer {
-  background: var(--navy);
+  background: #010C23;
   color: var(--white);
   padding: 3.5rem 0 2.5rem;
   text-align: center;
+  margin-top: -2px;
+  position: relative;
+  z-index: 0;
 }
 .footer-logo {
   font-family: var(--font-logo);
