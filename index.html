@@ -51,9 +51,9 @@
           </a>
         </div>
         <div class="hero-visual" aria-hidden="true">
-          <div class="blob blob-gray"><img src="assets/wix-blob-gray.svg" alt=""></div>
-          <div class="blob blob-navy"><img src="assets/wix-blob-navy.svg" alt=""></div>
-          <div class="phone">
+          <div class="blob blob-gray" data-parallax="0.08"><img src="assets/wix-blob-gray.svg" alt=""></div>
+          <div class="blob blob-navy" data-parallax="0.08"><img src="assets/wix-blob-navy.svg" alt=""></div>
+          <div class="phone" data-parallax="0.16">
             <img src="assets/phone-tasks.png" alt="" width="270" height="539">
           </div>
         </div>
@@ -70,12 +70,12 @@
 
         <article class="feature-card">
           <div class="feature-media">
-            <div class="blob blob-gray"><img src="assets/wix-blob-gray.svg" alt=""></div>
-            <div class="blob blob-navy"><img src="assets/wix-blob-navy.svg" alt=""></div>
-            <div class="phone">
+            <div class="blob blob-gray" data-parallax="0.08"><img src="assets/wix-blob-gray.svg" alt=""></div>
+            <div class="blob blob-navy" data-parallax="0.08"><img src="assets/wix-blob-navy.svg" alt=""></div>
+            <div class="phone" data-parallax="0.16">
               <img src="assets/phone-builder.png" alt="Rivex task definition builder on iPhone" width="250" height="499">
             </div>
-            <img class="feature-float right" src="assets/detail-step-builder.png" alt="" width="225" height="266">
+            <img class="feature-float right" data-parallax="0.25" src="assets/detail-step-builder.png" alt="" width="225" height="266">
           </div>
           <div class="feature-text">
             <span class="pill"><span class="pill-icon" aria-hidden="true"></span> Key features</span>
@@ -91,12 +91,12 @@
 
         <article class="feature-card reverse">
           <div class="feature-media">
-            <div class="blob blob-gray"><img src="assets/wix-blob-gray.svg" alt=""></div>
-            <div class="blob blob-navy"><img src="assets/wix-blob-navy.svg" alt=""></div>
-            <div class="phone">
+            <div class="blob blob-gray" data-parallax="0.08"><img src="assets/wix-blob-gray.svg" alt=""></div>
+            <div class="blob blob-navy" data-parallax="0.08"><img src="assets/wix-blob-navy.svg" alt=""></div>
+            <div class="phone" data-parallax="0.16">
               <img src="assets/phone-running.png" alt="Rivex running task monitor on iPhone" width="250" height="499">
             </div>
-            <img class="feature-float left" src="assets/detail-activity.png" alt="" width="225" height="216">
+            <img class="feature-float left" data-parallax="0.25" src="assets/detail-activity.png" alt="" width="225" height="216">
           </div>
           <div class="feature-text">
             <span class="pill"><span class="pill-icon" aria-hidden="true"></span> Key features</span>
@@ -112,12 +112,12 @@
 
         <article class="feature-card">
           <div class="feature-media">
-            <div class="blob blob-gray"><img src="assets/wix-blob-gray.svg" alt=""></div>
-            <div class="blob blob-navy"><img src="assets/wix-blob-navy.svg" alt=""></div>
-            <div class="phone">
+            <div class="blob blob-gray" data-parallax="0.08"><img src="assets/wix-blob-gray.svg" alt=""></div>
+            <div class="blob blob-navy" data-parallax="0.08"><img src="assets/wix-blob-navy.svg" alt=""></div>
+            <div class="phone" data-parallax="0.16">
               <img src="assets/phone-credentials.png" alt="Rivex credentials manager on iPhone" width="250" height="499">
             </div>
-            <img class="feature-float right" src="assets/detail-payment.png" alt="" width="225" height="198">
+            <img class="feature-float right" data-parallax="0.25" src="assets/detail-payment.png" alt="" width="225" height="198">
           </div>
           <div class="feature-text">
             <span class="pill"><span class="pill-icon" aria-hidden="true"></span> Key features</span>
@@ -153,7 +153,7 @@
               <p>Create a reusable workflow by selecting and arranging predefined automation steps.</p>
             </div>
           </div>
-          <div class="how-phone">
+          <div class="how-phone" data-parallax="0.16">
             <img src="assets/phone-empty.png" alt="Rivex empty tasks screen" width="270" height="539">
           </div>
           <div class="how-col">
@@ -176,12 +176,12 @@
     <section class="download" id="download" aria-labelledby="download-heading">
       <div class="container download-grid">
         <div class="download-visual" aria-hidden="true">
-          <div class="blob blob-gray"><img src="assets/wix-blob-gray.svg" alt=""></div>
-          <div class="blob blob-navy"><img src="assets/wix-blob-navy.svg" alt=""></div>
-          <div class="phone">
+          <div class="blob blob-gray" data-parallax="0.08"><img src="assets/wix-blob-gray.svg" alt=""></div>
+          <div class="blob blob-navy" data-parallax="0.08"><img src="assets/wix-blob-navy.svg" alt=""></div>
+          <div class="phone" data-parallax="0.16">
             <img src="assets/phone-tasks.png" alt="" width="250" height="499">
           </div>
-          <img class="feature-float right" src="assets/detail-running.png" alt="" width="225" height="245">
+          <img class="feature-float right" data-parallax="0.25" src="assets/detail-running.png" alt="" width="225" height="245">
         </div>
         <div class="download-copy">
           <span class="pill"><span class="pill-icon" aria-hidden="true"></span> Download</span>
@@ -207,62 +207,6 @@
       </div>
     </div>
   </footer>
-  <script>
-    (function () {
-      var toggle = document.querySelector('.nav-toggle');
-      var closeBtn = document.querySelector('.nav-close');
-      var nav = document.getElementById('site-nav');
-      var overlay = document.getElementById('nav-overlay');
-      if (!toggle || !nav || !overlay) return;
-
-      function openMenu() {
-        nav.hidden = false;
-        overlay.hidden = false;
-        requestAnimationFrame(function () {
-          nav.classList.add('open');
-          overlay.classList.add('open');
-        });
-        document.body.classList.add('menu-open');
-        toggle.setAttribute('aria-expanded', 'true');
-        toggle.setAttribute('aria-label', 'Close menu');
-      }
-      function closeMenu() {
-        nav.classList.remove('open');
-        overlay.classList.remove('open');
-        document.body.classList.remove('menu-open');
-        toggle.setAttribute('aria-expanded', 'false');
-        toggle.setAttribute('aria-label', 'Open menu');
-        setTimeout(function () {
-          if (!nav.classList.contains('open')) {
-            nav.hidden = true;
-            overlay.hidden = true;
-          }
-        }, 350);
-      }
-      function toggleMenu() {
-        if (nav.classList.contains('open')) closeMenu();
-        else openMenu();
-      }
-
-      toggle.addEventListener('click', toggleMenu);
-      if (closeBtn) closeBtn.addEventListener('click', closeMenu);
-      overlay.addEventListener('click', closeMenu);
-      nav.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', closeMenu);
-      });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && nav.classList.contains('open')) closeMenu();
-      });
-    })();
-    (function () {
-      var header = document.querySelector('.site-header');
-      if (!header) return;
-      function syncHeader() {
-        header.classList.toggle('is-solid', window.scrollY > 8);
-      }
-      syncHeader();
-      window.addEventListener('scroll', syncHeader, { passive: true });
-    })();
-  </script>
+  <script src="js/site.js"></script>
 </body>
 </html>
