@@ -631,6 +631,10 @@ ul { margin: 0; padding: 0; list-style: none; }
   bottom: auto;
   width: 225px;
 }
+.download-copy {
+  position: relative;
+  z-index: 2;
+}
 .download-copy h2 {
   font-size: clamp(1.75rem, 3vw, 2.4rem);
   letter-spacing: normal;
@@ -655,10 +659,12 @@ ul { margin: 0; padding: 0; list-style: none; }
     overflow: visible;
     padding-right: 0;
   }
+  /* Frame the phone like the hero — oversized blobs covered the badge
+     and clipped into grey fragments at the viewport edge. */
   .download-visual .blob {
-    width: 170%;
-    max-width: none;
-    height: 130%;
+    width: 78%;
+    max-width: 340px;
+    height: 78%;
   }
   .download-visual .feature-float { display: none; }
 }
