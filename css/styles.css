@@ -410,7 +410,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   border-radius: var(--radius-card);
   padding: 3rem 3.25rem;
   margin-bottom: 5.5rem;
-  overflow: hidden;
+  overflow: visible;
   min-height: 600px;
   width: 100%;
 }
@@ -435,7 +435,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .feature-media .phone {
   width: 250px;
   max-width: 75%;
-  margin-top: -2.75rem;
+  margin-top: 0;
 }
 .feature-float {
   position: absolute;
@@ -496,6 +496,19 @@ ul { margin: 0; padding: 0; list-style: none; }
   .feature-card.reverse .feature-text { order: unset; }
   .feature-media { min-height: 360px; }
   .feature-float { width: 160px; }
+}
+
+/* Mobile: flatten Key Features cards — no floating rounded chrome */
+@media (max-width: 749px) {
+  .feature-card,
+  .feature-card.reverse {
+    border-radius: 0;
+    width: calc(100% + 2.5rem);
+    max-width: none;
+    margin-left: -1.25rem;
+    margin-right: -1.25rem;
+    padding: 2.25rem 1.25rem 2rem;
+  }
 }
 
 /* ========== How it works ========== */
@@ -572,7 +585,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .download {
   background: var(--pale);
   padding: 6rem 0 0;
-  overflow: visible;
+  position: relative;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 .download-grid {
   display: grid;
@@ -593,9 +608,9 @@ ul { margin: 0; padding: 0; list-style: none; }
   min-width: 0;
 }
 .download-visual .blob {
-  width: min(100%, 380px);
-  max-width: 380px;
-  height: 92%;
+  width: 140%;
+  max-width: 520px;
+  height: 110%;
 }
 .download-visual .phone { width: 250px; max-width: 70%; }
 .download-visual .feature-float {
@@ -624,9 +639,14 @@ ul { margin: 0; padding: 0; list-style: none; }
   .download-copy { display: flex; flex-direction: column; align-items: center; order: -1; }
   .download-copy p { margin-inline: auto; }
   .download-visual {
-    min-height: 360px;
-    overflow: hidden;
+    min-height: 420px;
+    overflow: visible;
     padding-right: 0;
+  }
+  .download-visual .blob {
+    width: 170%;
+    max-width: none;
+    height: 130%;
   }
   .download-visual .feature-float { display: none; }
 }
