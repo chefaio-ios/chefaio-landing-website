@@ -619,10 +619,12 @@ ul { margin: 0; padding: 0; list-style: none; }
   padding-right: 2.5rem;
   min-width: 0;
 }
+/* Keep blobs behind the phone column. 140%/520px plus rotation
+   spilled the navy shape under the copy (dark-on-dark). */
 .download-visual .blob {
-  width: 140%;
-  max-width: 520px;
-  height: 110%;
+  width: 76%;
+  max-width: 320px;
+  height: 90%;
 }
 .download-visual .phone { width: 250px; max-width: 70%; }
 .download-visual .feature-float {
