@@ -1,5 +1,6 @@
 ---
 title: "Placeholder sample post (for Tech Writers)"
+published: false
 date: 2025-09-16
 author: "Rivex Tech Writing"
 description: >-

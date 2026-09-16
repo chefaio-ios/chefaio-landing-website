@@ -28,6 +28,7 @@ Example: `_posts/2025-10-01-shipping-task-templates.md` → `https://rivexapp.co
 | `canonical` | No | Canonical URL for syndication (Medium, Dev.to). Defaults to the post’s live URL on rivexapp.com. |
 | `tags` | No | List of tags (also emitted as `article:tag` meta). |
 | `categories` | No | Optional grouping (Jekyll-native; not shown in nav today). |
+| `published` | No | Set to `false` to keep a file in `_posts/` as a Tech Writer example without listing it on `/blog` or building a public URL. Defaults to `true`. Preview locally with `mise run jekyll-serve` (passes `--unpublished`). |
 
 ### Example
 
@@ -63,7 +64,7 @@ Your Markdown content starts here.
 - Fenced code blocks (``` … ```)
 - Ordered and unordered lists
 
-See `_posts/2025-09-16-placeholder-sample-post.md` for a live example (clearly marked as placeholder).
+See `_posts/2025-09-16-placeholder-sample-post.md` for a Markdown example (clearly marked as placeholder; `published: false` so it is not listed on `/blog`).
 
 ## Local preview
 
