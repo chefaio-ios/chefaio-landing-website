@@ -36,7 +36,7 @@ Homebrew is great for "give me a tool." It is weaker for "give me **this project
 
 Manual Tuist steps made things worse: they were easy to skip, hard to notice when skipped, and invisible in code review. Tuist belongs behind a single front door — not as a separate onboarding chapter.
 
-At Rivex we put that front door in `mise.toml` at the repo root. `AGENTS.md` documents the same path for humans and automation.
+At Rivex we put that front door in `mise.toml` at the repo root. Day-to-day commands like `mise build`, `mise test`, and `tuist generate` live in `AGENTS.md` — useful once you are set up, but not the clone checklist.
 
 ## Try it
 
@@ -49,7 +49,7 @@ mise trust
 mise install
 ```
 
-**Expected:** mise downloads and activates the pinned tools from `mise.toml`, then runs the `postinstall` hook. You should see install scripts under `Scripts/` execute — project generation, hooks, simulator prep — without running Tuist commands by hand.
+**Expected:** mise downloads and activates pinned tools (Tuist `4.174.2` among them), then runs the `postinstall` hook: `tuist install`, `tuist generate`, then four `Scripts/install-*.sh` helpers — without you running any of that by hand.
 
 Sanity-check the toolchain:
 
@@ -57,17 +57,16 @@ Sanity-check the toolchain:
 tuist version
 ```
 
-**Expected:** a version string matching the pin in `mise.toml` (not whatever happened to be on your PATH yesterday).
+**Expected:** `4.174.2` — matching `mise.toml`, not whatever happened to be on your PATH yesterday.
 
-Confirm the shared simulator exists:
+Confirm the workspace and simulator:
 
 ```bash
+ls ChefAIO.xcworkspace
 xcrun simctl list devices available | grep "Rivex - Agent"
 ```
 
-**Expected:** a bootable **Rivex - Agent** entry. Tests and local agent runs target that name so nobody improvises `iPhone 16` vs `iPhone 15 Pro` on day one.
-
-If anything fails, start with `AGENTS.md` — it is the source of truth for this flow.
+**Expected:** `ChefAIO.xcworkspace` on disk (generated projects are gitignored; you will not find them in a fresh clone until `mise install` runs). A bootable **Rivex - Agent** simulator entry. Tests and local agent runs target that name so nobody improvises `iPhone 16` vs `iPhone 15 Pro` on day one.
 
 ## What `mise install` actually owns
 
@@ -75,23 +74,26 @@ Think in three layers:
 
 **1. Pinned tools (`mise.toml` → `[tools]`)**
 
-mise installs and activates the versions the repo declares — Tuist, linters, and whatever else we have folded into the toolchain. Everyone gets the same binaries; agents included.
+mise installs and activates the versions the repo declares — Tuist `4.174.2`, linters, and the rest of the toolchain. Everyone gets the same binaries; agents included.
 
 **2. Postinstall hook (`mise.toml` → `[hooks]`)**
 
-After tools land, `postinstall` chains our `Scripts/install-*.sh` scripts. In practice that means:
+After tools land, `postinstall` runs in a fixed order:
 
-- **Tuist project generation** — dependencies resolved and the `.xcodeproj` / workspace produced from `Project.swift`, not checked in by hand.
-- **Git hooks** — format/lint gates wired locally so "forgot to run lint" is less of a personality trait.
-- **Rivex - Agent simulator** — a shared destination created if missing, so `mise test` (a follow-up post) does not debate simulator names.
+1. `tuist install` — resolve SPM dependencies
+2. `tuist generate` — produce `ChefAIO.xcworkspace` from `Project.swift`
+3. `Scripts/install-githooks.sh` — format/lint gates locally
+4. `Scripts/install-agent-simulator.sh` — create **Rivex - Agent** if missing
+5. `Scripts/install-cursor-permissions.sh` — agent IDE permissions
+6. `Scripts/install-openrouter-env.sh` — local env for agent API keys
 
-You do not memorize the script order. You run `mise install` once.
+Tuist runs in steps 1–2 directly in the hook. The install scripts handle everything *around* the Xcode project — hooks, simulator, agent tooling — not project generation itself.
 
-**3. Tuist stays behind the façade**
+**3. Same path in CI**
 
-Contributors should not need a mental model of Tuist's install vs generate split on day zero. The install scripts call Tuist; `AGENTS.md` documents the escape hatches if you are debugging project generation.
+`ci_scripts/ci_post_clone.sh` runs `mise install` and Tuist on Xcode Cloud too, so cloud builds do not drift from your laptop.
 
-We consolidated this wiring in a single mise pass (see PR #348 in the app repo history) so onboarding stopped being a checklist pasted into Slack.
+You do not memorize the order. You run `mise install` once.
 
 ## At Rivex we treat onboarding like an API
 
@@ -100,16 +102,18 @@ The contract is small:
 | Input | Output |
 |-------|--------|
 | `mise trust` | Repo config is allowed to run on your machine |
-| `mise install` | Pinned tools + postinstall scripts complete |
-| Open generated Xcode project | Builds against the same Tuist graph CI sees |
+| `mise install` | Pinned tools + postinstall complete |
+| Open `ChefAIO.xcworkspace` | Builds against the same Tuist graph CI sees |
 
 That is deliberately boring. Boring onboarding is how we keep humans and agents on the same rails when the product itself is about reliable automation.
+
+We wired this in commit `f93fed1d` ("[Misc] Use mise and simulator setup") — onboarding stopped being a checklist pasted into Slack.
 
 ## Takeaways
 
 - **One entry point beats a wiki.** If setup is not in version control, it will drift.
-- **Pin tools, then automate side effects.** mise handles versions; `Scripts/install-*.sh` handles everything that used to be "oh right, I always run that."
-- **Hide Tuist ceremony.** Generate on install; expose Tuist only when someone is actually changing project structure.
+- **Pin tools, then automate side effects.** mise handles versions; postinstall handles Tuist + the install scripts.
+- **Hide Tuist ceremony on day zero.** `mise install` runs install and generate; reach for `tuist generate` directly only when you are changing project structure.
 
 Next up in this series: why we wrap build and test behind `mise build` and `mise test` instead of raw `xcodebuild` flags — same philosophy, different layer.
 
