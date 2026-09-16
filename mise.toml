@@ -1,0 +1,30 @@
+# Local toolchain for the Rivex marketing site.
+# Today: static HTML/CSS/JS preview. Future: Jekyll blog on GitHub Pages.
+
+[settings]
+pin = true
+
+[tools]
+python = "3.12.11"
+ruby = "3.3.10"
+
+[hooks]
+postinstall = "mise run doctor"
+
+[tasks.install]
+description = "Install pinned tools (Python for preview, Ruby for upcoming Jekyll)"
+run = "mise install --yes"
+
+[tasks.setup]
+description = "First-time setup: install tools and run checks"
+depends = ["install", "doctor"]
+run = "echo 'Setup complete. Preview with: mise run serve'"
+
+[tasks.serve]
+description = "Preview the static site at http://localhost:8080/"
+alias = ["preview"]
+run = "python -m http.server 8080 --bind 127.0.0.1"
+
+[tasks.doctor]
+description = "Verify toolchain and required site files"
+file = "scripts/doctor.sh"

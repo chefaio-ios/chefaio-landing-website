@@ -61,7 +61,45 @@ Point DNS away from Wix only after the github.io preview looks good.
 
 Remove or replace existing Wix A/CNAME records that conflict. DNS propagation can take from a few minutes up to 48 hours.
 
-## Local preview
+## Local development (mise)
+
+This repo uses [mise](https://mise.jdx.dev/) for pinned tools and common tasks — similar to the Rivex iOS app workflow.
+
+1. **Install mise** (once per machine): see [mise.jdx.dev/getting-started.html](https://mise.jdx.dev/getting-started.html)
+2. **Trust this repo's config** (first time in this directory):
+
+   ```bash
+   mise trust
+   ```
+
+3. **Install tools and verify setup:**
+
+   ```bash
+   mise install
+   # or: mise run setup
+   ```
+
+4. **Preview the site locally:**
+
+   ```bash
+   mise run serve
+   ```
+
+   Open [http://localhost:8080/](http://localhost:8080/).
+
+### mise tasks
+
+| Task | Command | Purpose |
+|------|---------|---------|
+| setup | `mise run setup` | First-time install + checks |
+| install | `mise run install` | Install pinned Python and Ruby |
+| serve | `mise run serve` | Local static preview on port 8080 |
+| preview | `mise run preview` | Alias for `serve` |
+| doctor | `mise run doctor` | Verify site files and toolchain |
+
+Pinned **Python** powers local preview today. **Ruby** is pinned now so we can add a Jekyll blog later without reworking the toolchain.
+
+### Without mise
 
 Open `index.html` in a browser, or from this directory:
 
