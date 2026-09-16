@@ -1,0 +1,5 @@
+# Local mise overrides (never commit secrets or machine-specific config)
+.mise.local.toml
+
+# macOS
+.DS_Store
