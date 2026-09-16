@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="320" viewBox="0 0 800 320" role="img" aria-label="Sample blog hero placeholder">
+  <rect width="800" height="320" fill="#E2E8F0"/>
+  <rect x="40" y="40" width="720" height="240" rx="10" fill="#010C23" opacity="0.08"/>
+  <text x="400" y="150" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="28" fill="#010C23">Sample blog image</text>
+  <text x="400" y="190" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#4A5568">Replace with real artwork in blog/assets/</text>
+</svg>

@@ -1,6 +1,6 @@
 # Rivex marketing site (GitHub Pages)
 
-Static recreation of [rivexapp.com](https://www.rivexapp.com/) for hosting on GitHub Pages. Plain HTML/CSS (tiny mobile-nav JS). No build step.
+Static recreation of [rivexapp.com](https://www.rivexapp.com/) for hosting on GitHub Pages. Plain HTML/CSS (tiny mobile-nav JS) for the marketing pages; [Jekyll](https://jekyllrb.com/) powers the blog at `/blog/`.
 
 ## Enable GitHub Pages
 
@@ -12,6 +12,8 @@ Static recreation of [rivexapp.com](https://www.rivexapp.com/) for hosting on Gi
    - **Folder:** `/ (root)`
 4. Click **Save**.
 
+GitHub Pages runs Jekyll automatically. Existing static pages (`index.html`, `privacy/`, `tos/`) are copied through unchanged; blog posts are built from `_posts/`.
+
 ### Preview URL
 
 After Pages is enabled, the site is available at:
@@ -19,6 +21,15 @@ After Pages is enabled, the site is available at:
 **https://chefaio-ios.github.io/chefaio-landing-website/**
 
 Keep the live Wix site up until this preview looks correct.
+
+## Blog
+
+- **Live URL:** https://rivexapp.com/blog/
+- **Tech Writer guide:** [blog/README.md](blog/README.md)
+- **Add posts:** create Markdown in `_posts/`, images in `blog/assets/`
+- **Local preview:** `bundle install` then `mise run jekyll-serve` â†’ http://localhost:4000/
+
+See [blog/README.md](blog/README.md) for front matter fields, URL patterns, and syndication (`canonical` + Open Graph).
 
 ## Custom domain (`rivexapp.com`)
 
@@ -93,11 +104,14 @@ This repo uses [mise](https://mise.jdx.dev/) for pinned tools and common tasks â
 |------|---------|---------|
 | setup | `mise run setup` | First-time install + checks |
 | install | `mise run install` | Install pinned Python and Ruby |
-| serve | `mise run serve` | Local static preview on port 8080 |
+| serve | `mise run serve` | Static-only preview on port 8080 |
 | preview | `mise run preview` | Alias for `serve` |
+| jekyll-build | `mise run jekyll-build` | Build marketing site + blog to `_site/` |
+| jekyll-serve | `mise run jekyll-serve` | Jekyll preview on port 4000 (includes `/blog`) |
+| blog | `mise run blog` | Alias for `jekyll-serve` |
 | doctor | `mise run doctor` | Verify site files and toolchain |
 
-Pinned **Python** powers local preview today. **Ruby** is pinned now so we can add a Jekyll blog later without reworking the toolchain.
+Pinned **Python** powers quick static preview (`serve`). **Ruby** + Bundler power the Jekyll blog (`jekyll-serve`). Run `bundle install` once after cloning.
 
 ### Without mise
 
@@ -107,7 +121,7 @@ Open `index.html` in a browser, or from this directory:
 python3 -m http.server 8080
 ```
 
-Then visit `http://localhost:8080/`.
+Then visit `http://localhost:8080/`. For the blog, install Jekyll gems and run `bundle exec jekyll serve`.
 
 ## Structure
 
@@ -115,10 +129,16 @@ Then visit `http://localhost:8080/`.
 index.html          Landing page
 privacy/index.html  Privacy Policy (full legal text)
 tos/index.html      Terms of Service (full legal text)
+blog/               Blog index + assets (Jekyll)
+_posts/             Markdown blog posts (Jekyll)
+_layouts/           Jekyll layouts (shared chrome)
+_includes/          Jekyll partials (head, nav, footer)
+_config.yml         Jekyll + site config
 assets/             Local images (no wixstatic hotlinks)
 css/styles.css
 CNAME               rivexapp.com
 README.md
+blog/README.md      Tech Writer guide
 ```
 
 App Store link used everywhere: https://apps.apple.com/app/rivex/id6752362984
