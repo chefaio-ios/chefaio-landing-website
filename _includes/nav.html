@@ -1,0 +1,13 @@
+<div class="nav-overlay" id="nav-overlay" hidden></div>
+<nav class="nav-drawer" id="site-nav" aria-label="Primary" hidden>
+  <button class="nav-close" type="button" aria-label="Close menu">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <a href="{{ '/' | relative_url }}"{% if page.nav_active == 'home' %} class="is-active" aria-current="page"{% endif %}>Rivex</a>
+  <a href="{{ '/' | relative_url }}#features">Features</a>
+  <a href="{{ '/' | relative_url }}#how-it-works">How it work</a>
+  <a href="{{ '/' | relative_url }}#download">Download</a>
+  <a href="{{ '/blog/' | relative_url }}"{% if page.nav_active == 'blog' %} class="is-active" aria-current="page"{% endif %}>Blog</a>
+  <a href="{{ '/privacy/' | relative_url }}"{% if page.nav_active == 'privacy' %} class="is-active" aria-current="page"{% endif %}>Privacy Policy</a>
+  <a href="{{ '/tos/' | relative_url }}"{% if page.nav_active == 'tos' %} class="is-active" aria-current="page"{% endif %}>Terms of Service</a>
+</nav>

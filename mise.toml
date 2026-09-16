@@ -21,9 +21,19 @@ depends = ["install", "doctor"]
 run = "echo 'Setup complete. Preview with: mise run serve'"
 
 [tasks.serve]
-description = "Preview the static site at http://localhost:8080/"
+description = "Preview static files only (no Jekyll) at http://localhost:8080/"
 alias = ["preview"]
 run = "python -m http.server 8080 --bind 127.0.0.1"
+
+[tasks.jekyll-build]
+description = "Build Jekyll site (marketing + blog) to _site/"
+run = "bundle exec jekyll build"
+
+[tasks.jekyll-serve]
+description = "Preview Jekyll site at http://localhost:4000/ (includes /blog)"
+alias = ["blog"]
+depends = ["install"]
+run = "bundle exec jekyll serve --livereload --drafts"
 
 [tasks.doctor]
 description = "Verify toolchain and required site files"

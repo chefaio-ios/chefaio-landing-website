@@ -1,0 +1,38 @@
+# Jekyll config for Rivex marketing site + blog (GitHub Pages)
+# Static HTML (index, privacy, tos) is copied through unchanged.
+
+title: Rivex
+url: "https://rivexapp.com"
+baseurl: ""
+description: >-
+  Rivex is a smart automation app that lets you create custom tasks to
+  interact with websites automatically — saving you time and clicks.
+
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+permalink: /blog/:year/:month/:day/:slug/
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - blog/README.md
+  - mise.toml
+  - scripts/
+  - vendor/
+  - .mise.local.toml
+  - .git/
+  - .gitignore
+  - .github/
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: post
+      author: "Rivex Team"

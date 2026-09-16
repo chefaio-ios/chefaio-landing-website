@@ -23,18 +23,31 @@ check_path "js/site.js"
 check_path "privacy/index.html"
 check_path "tos/index.html"
 check_path "assets"
+check_path "_config.yml"
+check_path "Gemfile"
+check_path "blog/index.html"
+check_path "_posts"
 
 echo ""
 echo "== Toolchain =="
-for cmd in python ruby; do
+for cmd in python ruby bundle; do
   if command -v "$cmd" >/dev/null 2>&1; then
     version=$("$cmd" --version 2>&1 | head -1)
     echo "OK: $cmd ($version)"
   else
-    echo "MISSING: $cmd (run: mise install)"
+    echo "MISSING: $cmd (run: mise install && bundle install)"
     errors=$((errors + 1))
   fi
 done
+
+if command -v bundle >/dev/null 2>&1 && [[ -f Gemfile ]]; then
+  if bundle check >/dev/null 2>&1; then
+    echo "OK: bundle dependencies"
+  else
+    echo "MISSING: bundle dependencies (run: bundle install)"
+    errors=$((errors + 1))
+  fi
+fi
 
 echo ""
 if [[ "$errors" -gt 0 ]]; then

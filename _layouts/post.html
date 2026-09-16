@@ -1,0 +1,30 @@
+---
+layout: default
+---
+<main class="blog-main">
+  <article class="blog-wrap">
+    <a class="back-home" href="{{ '/blog/' | relative_url }}">← Back to Blog</a>
+    <header class="blog-post-header">
+      <h1>{{ page.title }}</h1>
+      <p class="blog-post-meta">
+        <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %d, %Y" }}</time>
+        {% if page.author %} · {{ page.author }}{% endif %}
+      </p>
+      {% if page.tags.size > 0 %}
+      <ul class="blog-tags" aria-label="Tags">
+        {% for tag in page.tags %}
+        <li>{{ tag }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </header>
+    {% if page.image %}
+    <figure class="blog-hero">
+      <img src="{{ page.image | relative_url }}" alt="">
+    </figure>
+    {% endif %}
+    <div class="blog-content">
+      {{ content }}
+    </div>
+  </article>
+</main>
