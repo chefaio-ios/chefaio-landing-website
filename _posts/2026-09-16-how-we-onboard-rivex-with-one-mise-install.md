@@ -36,7 +36,7 @@ Homebrew is great for "give me a tool." It is weaker for "give me **this project
 
 Manual Tuist steps made things worse: they were easy to skip, hard to notice when skipped, and invisible in code review. Tuist belongs behind a single front door — not as a separate onboarding chapter.
 
-At Rivex we put that front door in `mise.toml` at the repo root. Day-to-day commands like `mise build`, `mise test`, and `tuist generate` are documented for contributors once they are set up — but they are not the clone checklist.
+At Rivex we put that front door in `mise.toml` at the repo root. [Tuist recommends mise](https://tuist.dev/en/docs/guides/install-tuist) as the tool manager for exactly this reason — one file pins versions, one command installs them. Day-to-day commands like `mise build`, `mise test`, and `tuist generate` are documented for contributors once they are set up, but they are not the clone checklist.
 
 ## Try it
 
@@ -49,13 +49,15 @@ mise install
 
 **Expected:** mise downloads and activates the pinned tools from `mise.toml`, then runs the `postinstall` hook — Tuist dependency install, project generation, git hooks, a shared simulator, and a few agent-oriented bootstraps. You should not need to run any of that by hand.
 
-Sanity-check the toolchain:
+Sanity-check the toolchain — Tuist and the linters that used to drift on their own:
 
 ```bash
 tuist version
+swiftlint version
+swiftformat --version
 ```
 
-**Expected:** a version string matching the pin in `mise.toml`, not whatever happened to be on your PATH yesterday.
+**Expected:** version strings matching the pins in `mise.toml`, not whatever Homebrew happened to serve last week.
 
 Confirm the generated workspace exists:
 
@@ -71,7 +73,21 @@ Think in two layers:
 
 **1. Pinned tools (`mise.toml` → `[tools]`)**
 
-mise installs and activates the versions the repo declares — Tuist, linters, and the rest of the toolchain. Everyone gets the same binaries; agents included.
+mise installs and activates every version the repo declares — not just Tuist. A typical iOS `mise.toml` might look like this (illustrative):
+
+```toml
+[settings]
+pin = true
+
+[tools]
+tuist = "4.48.2"
+swiftlint = "0.57.0"
+swiftformat = "0.54.5"
+```
+
+That is the whole point of starting from Tuist with mise: you get Tuist *and* the satellite tools in one install. SwiftLint and SwiftFormat are the easy wins — same pin on your laptop, your teammate's machine, and CI. No more "works locally, fails in the pipeline because CI picked up a newer SwiftLint rule."
+
+Everyone gets the same binaries; agents included.
 
 **2. Postinstall hook (`mise.toml` → `[hooks]`)**
 
@@ -103,7 +119,7 @@ That is deliberately boring. Boring onboarding is how we keep humans and agents 
 ## Takeaways
 
 - **One entry point beats a wiki.** If setup is not in version control, it will drift.
-- **Pin tools, then automate side effects.** mise handles versions; postinstall handles Tuist plus the environment bootstraps.
+- **Pin tools, then automate side effects.** mise handles versions — Tuist, SwiftLint, SwiftFormat, and friends — postinstall handles the rest.
 - **Hide Tuist ceremony on day zero.** `mise install` runs install and generate; reach for `tuist generate` directly only when you are changing project structure.
 
 Next up in this series: why we wrap build and test behind `mise build` and `mise test` instead of raw `xcodebuild` flags — same philosophy, different layer.
