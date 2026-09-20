@@ -62,6 +62,6 @@ jobs:
             exit 0
           fi
 
-          git add _posts blog/assets/notion
+          git add _posts blog/assets
           git commit -m "chore(blog): sync Published posts from Notion"
           git push origin main

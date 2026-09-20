@@ -1,6 +1,6 @@
 # Notion blog sync
 
-Exports **Published** posts from the Notion Blog Posts database into Jekyll `_posts/` and downloads images to `blog/assets/notion/`.
+Exports **Published** posts from the Notion Blog Posts database into Jekyll `_posts/` and downloads images to `blog/assets/`.
 
 ## Required environment variables
 
@@ -34,8 +34,10 @@ mise run jekyll-serve
 ## Behavior
 
 - Queries Notion for rows where `Status` is `Published`
-- Writes `_posts/YYYY-MM-DD-slug.md` with a `notion_id` front-matter marker
-- Downloads cover and inline images to `blog/assets/notion/<page-id>/`
+- Writes `_posts/YYYY-MM-DD-slug.md` with required front matter (`title`, `date`, `author`, `description`) plus `notion_id`
+- Slug is used in the filename only (not exported as a front-matter key)
+- Sets `canonical` from Notion or computes `https://rivexapp.com/blog/YYYY/MM/DD/<slug>/`
+- Downloads cover and inline images to `blog/assets/<page-id>/`
 - Removes previously synced posts (those with `notion_id`) when they are no longer `Published`
 - Leaves hand-written posts without `notion_id` untouched
 

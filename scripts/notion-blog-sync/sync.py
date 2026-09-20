@@ -20,7 +20,8 @@ from notion_client.errors import APIResponseError
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 POSTS_DIR = REPO_ROOT / "_posts"
-ASSETS_DIR = REPO_ROOT / "blog" / "assets" / "notion"
+ASSETS_DIR = REPO_ROOT / "blog" / "assets"
+SITE_URL = "https://rivexapp.com"
 PUBLISHED_STATUS = "Published"
 NOTION_ID_KEY = "notion_id"
 
@@ -165,7 +166,7 @@ def download_cover_image(
     safe_name = re.sub(r"[^\w.\-]+", "-", name).strip("-") or "cover.jpg"
     destination = asset_subdir(notion_id) / safe_name
     download_asset(session, url, destination, notion_token)
-    return f"/blog/assets/notion/{destination.relative_to(ASSETS_DIR).as_posix()}"
+    return f"/blog/assets/{destination.relative_to(ASSETS_DIR).as_posix()}"
 
 
 class BlockConverter:
@@ -332,7 +333,7 @@ class BlockConverter:
         extension = extension_from_url(url, ".jpg")
         destination = self.asset_dir / f"{prefix}-{digest}{extension}"
         download_asset(self.session, url, destination, self.notion_token)
-        local_path = f"/blog/assets/notion/{destination.relative_to(ASSETS_DIR).as_posix()}"
+        local_path = f"/blog/assets/{destination.relative_to(ASSETS_DIR).as_posix()}"
         self.downloaded_urls[url] = local_path
         return local_path
 
@@ -351,13 +352,15 @@ def build_post(
     post_date = parse_post_date(get_property_value(properties, "Date"))
     author = get_property_value(properties, "Author") or "Rivex Team"
     description = get_property_value(properties, "Description") or title
-    canonical = get_property_value(properties, "Canonical url")
+    canonical = get_property_value(properties, "Canonical url") or get_property_value(
+        properties, "Canonical"
+    )
     tags = get_property_value(properties, "Tags") or []
     cover_files = get_property_value(properties, "Cover") or []
     image = download_cover_image(session, notion_token, notion_id, cover_files)
     converter = BlockConverter(session, notion_token, notion_id)
     body = converter.convert_blocks(client, notion_id)
-    return PostData(
+    post = PostData(
         notion_id=notion_id,
         title=title,
         slug=slug,
@@ -368,6 +371,16 @@ def build_post(
         canonical=canonical,
         tags=tags,
         body=body,
+    )
+    if not post.canonical:
+        post.canonical = canonical_permalink(post)
+    return post
+
+
+def canonical_permalink(post: PostData) -> str:
+    return (
+        f"{SITE_URL}/blog/{post.post_date.year:04d}/"
+        f"{post.post_date.month:02d}/{post.post_date.day:02d}/{post.slug}/"
     )
 
 
@@ -381,8 +394,7 @@ def render_front_matter(post: PostData) -> str:
     }
     if post.image:
         data["image"] = post.image
-    if post.canonical:
-        data["canonical"] = post.canonical
+    data["canonical"] = post.canonical or canonical_permalink(post)
     if post.tags:
         data["tags"] = post.tags
     return yaml.safe_dump(

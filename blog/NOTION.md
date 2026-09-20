@@ -19,25 +19,27 @@ Do **not** hand-edit synced Markdown files in `_posts/` that contain a `notion_i
 | Notion property | Jekyll front matter | Notes |
 |-----------------|---------------------|-------|
 | Name | `title` | Page title |
-| Slug | filename slug | Used in `_posts/YYYY-MM-DD-<slug>.md` and the public URL |
-| Date | `date` | `YYYY-MM-DD`; controls sort order |
+| Slug | filename slug only | `_posts/YYYY-MM-DD-<slug>.md` — **not** a front-matter field |
+| Date | `date` + filename prefix | `YYYY-MM-DD` in front matter and filename |
 | Status | *(not exported)* | Must be **Published** to sync |
 | Description | `description` | SEO summary and Open Graph text |
 | Author | `author` | Byline |
-| Cover | `image` | Downloaded to `/blog/assets/notion/...` |
+| Cover | `image` | Downloaded to `/blog/assets/...` |
 | Tags | `tags` | Multi-select → YAML list |
-| Canonical url | `canonical` | Optional syndication canonical URL |
+| Canonical url | `canonical` | Syndication URL; defaults to `https://rivexapp.com/blog/YYYY/MM/DD/<slug>/` |
 | Page body blocks | Markdown body | Headings, lists, quotes, code, images, etc. |
 | *(system)* | `notion_id` | Added by the sync script to track managed posts |
 
-Published URLs follow the existing pattern:
+Published URLs follow the Jekyll permalink pattern:
 
-`/blog/YYYY/MM/DD/your-slug/`
+`/blog/YYYY/MM/DD/your-slug/` → `https://rivexapp.com/blog/YYYY/MM/DD/your-slug/`
+
+Synced files are written to `_posts/` (repo root), not `blog/_posts/`.
 
 ## Images
 
-- **Cover** files are stored under `blog/assets/notion/` and referenced from front matter `image`.
-- Inline images in the Notion body are downloaded to the same folder and rewritten in Markdown.
+- **Cover** files are stored under `blog/assets/` and referenced from front matter `image` (e.g. `/blog/assets/my-cover.png`).
+- Inline images in the Notion body are downloaded to `blog/assets/` and rewritten in Markdown.
 
 ## Triggering a sync
 
