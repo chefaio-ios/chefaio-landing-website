@@ -16,11 +16,13 @@ categories:
   - engineering
 ---
 
-Clone the repo. Run one command. Open Xcode.
+Onboarding a new iOS engineer — or spinning up a fresh machine for an AI coding agent — should not take an afternoon of Slack archaeology. When every clone drifts on tool versions and manual setup steps, you pay for it in slow first builds, flaky local tests, and "works on my Mac" threads that never quite close.
 
-That is the onboarding bar we set for the Rivex iOS app. If you have ever joined a Tuist project where every machine had a different Tuist version — and nobody could agree which one was "right" — you know why we bothered.
+This post is about the choices we made to fix that on the Rivex iOS codebase: what we tried first, why we landed on [mise](https://mise.jdx.dev/) as the single front door, and what still bites us. Not a product pitch — a walkthrough of trade-offs you can steal.
 
-## The problem we were tired of
+If you have ever joined a Tuist project where every machine had a different Tuist version — and nobody could agree which one was "right" — you know why we bothered.
+
+## The scavenger hunt we inherited
 
 Fresh clones used to mean a scavenger hunt:
 
@@ -30,17 +32,28 @@ Fresh clones used to mean a scavenger hunt:
 
 None of that is hard. All of it is **friction that compounds** when a human and an agent should share the same machine state. We wanted clone → build with no tribal knowledge.
 
-## Why brew-only and manual Tuist did not stick
+## What we tried first
 
-Homebrew is great for "give me a tool." It is weaker for "give me **this project's** tool graph, activated in **this directory**, with **post-clone side effects** run in order."
+**Homebrew-only.** Fine for installing a tool globally. Weak for "this project needs *these* versions, activated in *this* directory, with side effects in a fixed order." Tuist on brew might not match the Tuist your CI job runs. SwiftLint might not match either.
 
-Manual Tuist steps made things worse: they were easy to skip, hard to notice when skipped, and invisible in code review. Tuist belongs behind a single front door — not as a separate onboarding chapter.
+**Manual Tuist steps in a README.** Worse in a different way: easy to skip, hard to notice when skipped, invisible in code review. Someone always runs `tuist generate` before `tuist install` once, wastes twenty minutes, and posts a confused emoji in Slack.
 
-At Rivex we put that front door in `mise.toml` at the repo root. [Tuist recommends mise](https://tuist.dev/en/docs/guides/install-tuist) as the tool manager for exactly this reason — one file pins versions, one command installs them. Day-to-day commands like `mise build`, `mise test`, and `tuist generate` are documented for contributors once they are set up, but they are not the clone checklist.
+We needed one command that pins tools *and* runs the post-clone ceremony — in the right order, every time.
+
+## Why mise became the front door
+
+The dependency order mattered to us:
+
+1. **Pin tools first** — Tuist, linters, formatters, anything else the repo expects.
+2. **Then run side effects** — project generation, hooks, simulator setup, agent bootstraps.
+
+[Tuist recommends mise](https://tuist.dev/en/docs/guides/install-tuist) for exactly this split: one `mise.toml` declares versions, one `mise install` activates them. At Rivex we put that file at the repo root. Day-to-day commands like `mise build`, `mise test`, and `tuist generate` are documented for contributors once they are set up — but they are not the clone checklist.
+
+And mise is not just a Tuist installer. That is the part teams miss when they stop at pinning Tuist alone.
 
 ## Try it
 
-From a clean macOS machine with [mise](https://mise.jdx.dev/getting-started.html) installed, in your project directory:
+From a clean macOS machine with [mise installed](https://mise.jdx.dev/getting-started.html), in your project directory:
 
 ```bash
 mise trust
@@ -67,13 +80,11 @@ ls *.xcworkspace
 
 **Expected:** a generated Xcode workspace on disk. Tuist output is gitignored, so a fresh clone will not have one until `mise install` finishes. Open it in Xcode and you are ready to build.
 
-## What `mise install` actually owns
+## What `mise install` actually does
 
-Think in two layers:
+**Layer 1 — pinned tools (`mise.toml` → `[tools]`)**
 
-**1. Pinned tools (`mise.toml` → `[tools]`)**
-
-mise installs and activates every version the repo declares — not just Tuist. A typical iOS `mise.toml` might look like this (illustrative):
+A typical iOS `mise.toml` might look like this (illustrative):
 
 ```toml
 [settings]
@@ -85,11 +96,9 @@ swiftlint = "0.57.0"
 swiftformat = "0.54.5"
 ```
 
-That is the whole point of starting from Tuist with mise: you get Tuist *and* the satellite tools in one install. SwiftLint and SwiftFormat are the easy wins — same pin on your laptop, your teammate's machine, and CI. No more "works locally, fails in the pipeline because CI picked up a newer SwiftLint rule."
+SwiftLint and SwiftFormat are the easy wins — same pin on your laptop, your teammate's machine, and CI. No more "works locally, fails in the pipeline because CI picked up a newer SwiftLint rule." Everyone gets the same binaries; agents included.
 
-Everyone gets the same binaries; agents included.
-
-**2. Postinstall hook (`mise.toml` → `[hooks]`)**
+**Layer 2 — postinstall hook (`mise.toml` → `[hooks]`)**
 
 After tools land, `postinstall` runs in a fixed order:
 
@@ -97,16 +106,23 @@ After tools land, `postinstall` runs in a fixed order:
 2. `tuist generate` — produce the generated Xcode workspace from `Project.swift`
 3. Bootstrap git hooks — format/lint gates locally
 4. Install a shared simulator — one consistent destination for local runs and tests
-5. Set up agent IDE permissions
+5. Set up agent IDE permissions — the local access an AI coding agent needs to read files, run terminal commands, and work inside your editor without you clicking through prompts every session
 6. Bootstrap shared env — API keys and config agents expect locally
 
-Tuist runs in steps 1–2 directly in the hook. Everything after that handles the environment *around* the Xcode project — hooks, simulator, agent tooling — not project generation itself.
+Tuist runs in steps 1–2 directly in the hook. Everything after that handles the environment *around* the Xcode project — not project generation itself.
 
 You do not memorize the order. You run `mise install` once.
 
-## At Rivex we treat onboarding like an API
+## What bit us
 
-The contract is small:
+A few things production (and impatient teammates) taught us that the design alone did not:
+
+- **Order matters.** `tuist install` before `tuist generate` is not negotiable. We had to encode that in postinstall because READMEs do not survive contact with Monday morning.
+- **Pinning only Tuist is not enough.** SwiftLint drift caused more "CI is broken but I cannot reproduce it" tickets than Tuist version skew ever did. Bundling linters in `mise.toml` was cheap insurance.
+- **Manual steps do not scale to agents.** A human might forgive a five-step checklist. An agent will not — it needs the same deterministic entry point every time.
+- **Postinstall is not free.** It adds time to every fresh clone. We accepted that trade-off over debugging mismatched environments.
+
+## Principles we'd steal
 
 | Input | Output |
 |-------|--------|
@@ -114,16 +130,12 @@ The contract is small:
 | `mise install` | Pinned tools + postinstall complete |
 | Open the generated Xcode workspace | Builds against the same Tuist graph the team expects |
 
-That is deliberately boring. Boring onboarding is how we keep humans and agents on the same rails when the product itself is about reliable automation. Once we moved setup into `mise.toml`, onboarding stopped being a checklist pasted into Slack.
-
-## Takeaways
-
 - **One entry point beats a wiki.** If setup is not in version control, it will drift.
 - **Pin tools, then automate side effects.** mise handles versions — Tuist, SwiftLint, SwiftFormat, and friends — postinstall handles the rest.
-- **Hide Tuist ceremony on day zero.** `mise install` runs install and generate; reach for `tuist generate` directly only when you are changing project structure.
+- **Hide Tuist ceremony on day zero.** Reach for `tuist generate` directly only when you are changing project structure.
 
 Next up in this series: why we wrap build and test behind `mise build` and `mise test` instead of raw `xcodebuild` flags — same philosophy, different layer.
 
 ---
 
-If reproducible dev environments matter to you, [try Rivex](https://apps.apple.com/app/rivex/id6752362984) — we built the app the same way we built the repo.
+If reproducible dev environments matter to you, [try Rivex on the App Store](https://apps.apple.com/app/rivex/id6752362984) — we built the app the same way we built the repo.
