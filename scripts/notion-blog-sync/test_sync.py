@@ -202,5 +202,28 @@ class BlockConverterTests(unittest.TestCase):
         )
 
 
+    def test_onboarding_post_snippet_regression(self) -> None:
+        from fixtures.onboarding_post_blocks import TABLE_ROWS, onboarding_snippet_blocks
+
+        converter, client = self._converter({"principles-table": TABLE_ROWS})
+        markdown = converter._render_blocks(client, onboarding_snippet_blocks())
+
+        self.assertIn("## What `mise install` actually does", markdown)
+        self.assertIn("Layer 1 — pinned tools (`mise.toml` → `[tools]`)", markdown)
+        self.assertNotIn("****", markdown)
+        self.assertIn('tuist = "4.48.2"', markdown)
+        self.assertIn('swiftlint = "0.57.0"', markdown)
+        self.assertIn("\n```toml\n[settings]", markdown)
+        self.assertIn('swiftformat = "0.54.5"\n```\n\n1. **Bootstrap shared env**', markdown)
+        self.assertIn("1. **Bootstrap shared env**\n\nTuist runs in steps", markdown)
+        self.assertIn("- **Postinstall is not free.**\n\n## Principles we'd steal", markdown)
+        self.assertIn("## Principles we'd steal\n\n| Input | Output |", markdown)
+        self.assertIn("| `mise trust` | Repo config is allowed", markdown)
+        self.assertIn(
+            "| Repo config is allowed to run on your machine |\n\n- **One entry point beats a wiki.**",
+            markdown,
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
