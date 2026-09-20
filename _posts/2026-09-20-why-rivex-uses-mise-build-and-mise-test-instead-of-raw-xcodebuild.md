@@ -103,7 +103,7 @@ Xcode Cloud is a different runner. In our setup it uses mise for toolchain and g
 
 Build and test are not the only shared actions teams need. When you update a language-model prompt or a guardrail, you also need a repeatable way to check that it still behaves the way you expect — same cases, same asserts, same command for every engineer.
 
-At Rivex we put that check behind a mise task too. The task runs a small harness folder (config, cases, asserts). You can use a tool such as Promptfoo under the hood; the important part for the team is the shared front door, not learning a separate eval CLI each time. Production prompts stay single-source conceptually (copy or symlink into the harness — do not scatter forever-copies). Default to a local provider; optional cloud provider via flags and a local env API key.
+At Rivex we put that check behind a mise task too. The task runs a small harness folder (config, cases, asserts). Promptfoo is a tool that evaluates and tests prompts and guardrails against those cases — we run it under the mise task so the team shares one front door instead of learning a separate eval CLI each time. Production prompts stay single-source conceptually (copy or symlink into the harness — do not scatter forever-copies). Default to a local provider; optional cloud provider via flags and a local env API key.
 
 Scrubbed shapes:
 
