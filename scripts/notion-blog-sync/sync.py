@@ -24,6 +24,19 @@ ASSETS_DIR = REPO_ROOT / "blog" / "assets"
 SITE_URL = "https://rivexapp.com"
 PUBLISHED_STATUS = "Published"
 NOTION_ID_KEY = "notion_id"
+LIST_BLOCK_TYPES = frozenset({"bulleted_list_item", "numbered_list_item", "to_do"})
+SMART_QUOTE_MAP = {
+    "\u201c": '"',
+    "\u201d": '"',
+    "\u2018": "'",
+    "\u2019": "'",
+}
+
+
+def normalize_smart_quotes(text: str) -> str:
+    for source, target in SMART_QUOTE_MAP.items():
+        text = text.replace(source, target)
+    return text
 
 
 @dataclass
@@ -60,22 +73,29 @@ def slugify(text: str) -> str:
     return slug.strip("-") or "post"
 
 
-def rich_text_to_markdown(rich_text: list[dict[str, Any]]) -> str:
+def rich_text_to_markdown(
+    rich_text: list[dict[str, Any]],
+    *,
+    strip_bold: bool = False,
+) -> str:
+    has_code = any(item.get("annotations", {}).get("code") for item in rich_text)
+    suppress_bold = strip_bold or has_code
     parts: list[str] = []
     for item in rich_text:
-        text = item.get("plain_text", "")
+        text = normalize_smart_quotes(item.get("plain_text", ""))
         if not text:
             continue
         annotations = item.get("annotations", {})
         href = item.get("href")
         if annotations.get("code"):
             text = f"`{text}`"
-        if annotations.get("bold"):
-            text = f"**{text}**"
-        if annotations.get("italic"):
-            text = f"*{text}*"
-        if annotations.get("strikethrough"):
-            text = f"~~{text}~~"
+        else:
+            if annotations.get("bold") and not suppress_bold:
+                text = f"**{text}**"
+            if annotations.get("italic"):
+                text = f"*{text}*"
+            if annotations.get("strikethrough"):
+                text = f"~~{text}~~"
         if href:
             text = f"[{text}]({href})"
         parts.append(text)
@@ -193,107 +213,129 @@ class BlockConverter:
         return blocks
 
     def _render_blocks(self, client: Client, blocks: list[dict[str, Any]], indent: int = 0) -> str:
-        lines: list[str] = []
+        chunks: list[str] = []
+        pending_list: list[str] = []
         list_counter = 0
+        prefix = "  " * indent
+
+        def flush_list() -> None:
+            nonlocal list_counter
+            if pending_list:
+                chunks.append("\n".join(pending_list))
+                pending_list.clear()
+            list_counter = 0
+
+        def emit_block(text: str) -> None:
+            if not text.strip():
+                return
+            flush_list()
+            chunks.append(text)
+
+        def append_list_line(line: str) -> None:
+            pending_list.append(line)
+
         for block in blocks:
             block_type = block.get("type")
             if not block_type:
                 continue
             payload = block.get(block_type, {})
-            prefix = "  " * indent
 
             if block_type == "paragraph":
                 text = rich_text_to_markdown(payload.get("rich_text", []))
-                lines.append(f"{prefix}{text}" if text else "")
+                emit_block(f"{prefix}{text}" if text else "")
             elif block_type in {"heading_1", "heading_2", "heading_3"}:
                 level = {"heading_1": "#", "heading_2": "##", "heading_3": "###"}[block_type]
-                text = rich_text_to_markdown(payload.get("rich_text", []))
-                lines.append(f"{prefix}{level} {text}".rstrip())
+                text = rich_text_to_markdown(payload.get("rich_text", []), strip_bold=True)
+                emit_block(f"{prefix}{level} {text}".rstrip())
             elif block_type == "bulleted_list_item":
                 text = rich_text_to_markdown(payload.get("rich_text", []))
-                lines.append(f"{prefix}- {text}")
+                append_list_line(f"{prefix}- {text}")
                 if block.get("has_children"):
                     children = self._fetch_blocks(client, block["id"])
                     child_md = self._render_blocks(client, children, indent + 1)
                     if child_md:
-                        lines.append(child_md)
+                        append_list_line(child_md)
             elif block_type == "numbered_list_item":
                 list_counter += 1
                 text = rich_text_to_markdown(payload.get("rich_text", []))
-                lines.append(f"{prefix}{list_counter}. {text}")
+                append_list_line(f"{prefix}{list_counter}. {text}")
                 if block.get("has_children"):
                     children = self._fetch_blocks(client, block["id"])
                     child_md = self._render_blocks(client, children, indent + 1)
                     if child_md:
-                        lines.append(child_md)
+                        append_list_line(child_md)
             elif block_type == "to_do":
                 checked = payload.get("checked", False)
                 mark = "x" if checked else " "
                 text = rich_text_to_markdown(payload.get("rich_text", []))
-                lines.append(f"{prefix}- [{mark}] {text}")
+                append_list_line(f"{prefix}- [{mark}] {text}")
             elif block_type == "quote":
                 text = rich_text_to_markdown(payload.get("rich_text", []))
-                for quote_line in text.splitlines() or [""]:
-                    lines.append(f"{prefix}> {quote_line}")
+                quote_lines = [f"{prefix}> {quote_line}" for quote_line in text.splitlines() or [""]]
+                emit_block("\n".join(quote_lines))
             elif block_type == "callout":
                 text = rich_text_to_markdown(payload.get("rich_text", []))
-                lines.append(f"{prefix}> {text}")
+                emit_block(f"{prefix}> {text}")
             elif block_type == "code":
                 language = payload.get("language", "")
-                code_text = "".join(part.get("plain_text", "") for part in payload.get("rich_text", []))
-                lines.append(f"{prefix}```{language}".rstrip())
-                lines.extend(code_text.splitlines())
-                lines.append(f"{prefix}```")
+                code_text = normalize_smart_quotes(
+                    "".join(part.get("plain_text", "") for part in payload.get("rich_text", []))
+                )
+                code_lines = [f"```{language}".rstrip(), *code_text.splitlines(), "```"]
+                emit_block("\n".join(code_lines))
             elif block_type == "divider":
-                lines.append(f"{prefix}---")
+                emit_block(f"{prefix}---")
             elif block_type == "image":
                 image_url = self._image_url(payload)
                 if image_url:
                     local_path = self._download_image(image_url, "image")
                     caption = rich_text_to_markdown(payload.get("caption", []))
                     alt = caption or Path(local_path).stem
-                    lines.append(f"{prefix}![{alt}]({local_path})")
+                    emit_block(f"{prefix}![{alt}]({local_path})")
             elif block_type == "bookmark":
                 url = payload.get("url")
                 caption = rich_text_to_markdown(payload.get("caption", [])) or url
                 if url:
-                    lines.append(f"{prefix}[{caption}]({url})")
+                    emit_block(f"{prefix}[{caption}]({url})")
             elif block_type == "embed":
                 url = payload.get("url")
                 if url:
-                    lines.append(f"{prefix}[Embedded content]({url})")
+                    emit_block(f"{prefix}[Embedded content]({url})")
             elif block_type == "video":
                 url = self._file_url(payload)
                 if url:
-                    lines.append(f"{prefix}[Video]({url})")
+                    emit_block(f"{prefix}[Video]({url})")
             elif block_type == "file":
                 url = self._file_url(payload)
                 caption = rich_text_to_markdown(payload.get("caption", [])) or "Download file"
                 if url:
-                    lines.append(f"{prefix}[{caption}]({url})")
+                    emit_block(f"{prefix}[{caption}]({url})")
             elif block_type == "table":
                 table_rows = self._fetch_blocks(client, block["id"])
-                lines.append(self._render_table(table_rows))
+                emit_block(self._render_table(table_rows))
             elif block_type == "column_list":
+                column_chunks: list[str] = []
                 for column in self._fetch_blocks(client, block["id"]):
                     child_blocks = self._fetch_blocks(client, column["id"])
-                    lines.append(self._render_blocks(client, child_blocks))
+                    column_md = self._render_blocks(client, child_blocks)
+                    if column_md:
+                        column_chunks.append(column_md)
+                emit_block("\n\n".join(column_chunks))
             elif block_type == "toggle":
                 text = rich_text_to_markdown(payload.get("rich_text", []))
-                lines.append(f"{prefix}<details><summary>{text}</summary>")
+                toggle_lines = [f"{prefix}<details><summary>{text}</summary>"]
                 if block.get("has_children"):
                     children = self._fetch_blocks(client, block["id"])
-                    lines.append(self._render_blocks(client, children, indent))
-                lines.append(f"{prefix}</details>")
+                    toggle_lines.append(self._render_blocks(client, children, indent))
+                toggle_lines.append(f"{prefix}</details>")
+                emit_block("\n".join(toggle_lines))
             else:
                 text = rich_text_to_markdown(payload.get("rich_text", []))
                 if text:
-                    lines.append(f"{prefix}{text}")
+                    emit_block(f"{prefix}{text}")
 
-            if block_type not in {"numbered_list_item"}:
-                list_counter = 0
-
-        return "\n".join(lines).strip()
+        flush_list()
+        return "\n\n".join(chunks).strip()
 
     def _render_table(self, rows: list[dict[str, Any]]) -> str:
         table_lines: list[str] = []
@@ -302,12 +344,13 @@ class BlockConverter:
             if row.get("type") != "table_row":
                 continue
             cells = row.get("table_row", {}).get("cells", [])
-            cell_text = [" ".join(part.get("plain_text", "") for part in cell) for cell in cells]
+            cell_text = [rich_text_to_markdown(cell) for cell in cells]
             column_count = max(column_count, len(cell_text))
             table_lines.append("| " + " | ".join(cell_text) + " |")
-        if table_lines:
-            separator = "| " + " | ".join(["---"] * column_count) + " |"
-            table_lines.insert(1, separator)
+        if not table_lines:
+            return ""
+        separator = "| " + " | ".join(["---"] * column_count) + " |"
+        table_lines.insert(1, separator)
         return "\n".join(table_lines)
 
     def _image_url(self, payload: dict[str, Any]) -> str | None:

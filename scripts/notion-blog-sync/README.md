@@ -9,6 +9,13 @@ Exports **Published** posts from the Notion Blog Posts database into Jekyll `_po
 | `NOTION_TOKEN` | Notion integration secret with access to the Blog Posts database |
 | `NOTION_BLOG_DATABASE_ID` | Database ID (`62c4f7e431b3477aad89da0e6880abcc` for Rivex) |
 
+## Tests
+
+```bash
+pip install -r scripts/notion-blog-sync/requirements.txt
+python3 -m unittest scripts/notion-blog-sync/test_sync.py -v
+```
+
 ## Local run
 
 From the repo root:
