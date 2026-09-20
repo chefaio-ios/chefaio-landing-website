@@ -1,26 +1,31 @@
 # Rivex marketing site (GitHub Pages)
 
-Static recreation of [rivexapp.com](https://www.rivexapp.com/) for hosting on GitHub Pages. Plain HTML/CSS (tiny mobile-nav JS) for the marketing pages; [Jekyll](https://jekyllrb.com/) powers the blog at `/blog/`.
+Public marketing site for [Rivex](https://rivexapp.com/), plus a [Jekyll](https://jekyllrb.com/) blog. Marketing pages are plain HTML/CSS with a small mobile-nav script; Jekyll builds `/blog/` from `_posts/`.
 
-## Enable GitHub Pages
+**Live**
 
-1. Push this repo to GitHub (parent agent handles push).
-2. Open **Settings → Pages**.
-3. Under **Build and deployment**, set:
-   - **Source:** Deploy from a branch
-   - **Branch:** `main`
-   - **Folder:** `/ (root)`
-4. Click **Save**.
+- Site: [https://rivexapp.com](https://rivexapp.com)
+- Blog: [https://rivexapp.com/blog/](https://rivexapp.com/blog/)
+
+The GitHub Pages project URL ([https://chefaio-ios.github.io/chefaio-landing-website/](https://chefaio-ios.github.io/chefaio-landing-website/)) redirects to the custom domain.
+
+## GitHub Pages
+
+The production site is already published from this repository. Pages is configured as:
+
+- **Source:** Deploy from a branch
+- **Branch:** `main`
+- **Folder:** `/ (root)`
 
 GitHub Pages runs Jekyll automatically. Existing static pages (`index.html`, `privacy/`, `tos/`) are copied through unchanged; blog posts are built from `_posts/`.
 
-### Preview URL
+To inspect or re-apply that setup: **Settings → Pages → Build and deployment**.
 
-After Pages is enabled, the site is available at:
+### Custom domain (`rivexapp.com`)
 
-**https://chefaio-ios.github.io/chefaio-landing-website/**
+This repo includes a `CNAME` file set to `rivexapp.com`. In **Settings → Pages**, the custom domain is `rivexapp.com` and **Enforce HTTPS** is enabled.
 
-Keep the live Wix site up until this preview looks correct.
+DNS for the custom domain is already pointed at GitHub Pages. Keep registrar record changes out of this public README; use GitHub’s [custom domain docs](https://docs.github.com/pages/configuring-a-custom-domain-for-your-github-pages-site) if you need the current procedure.
 
 ## Blog
 
@@ -30,47 +35,6 @@ Keep the live Wix site up until this preview looks correct.
 - **Local preview:** `bundle install` then `mise run jekyll-serve` → http://localhost:4000/
 
 See [blog/README.md](blog/README.md) for front matter fields, URL patterns, and syndication (`canonical` + Open Graph).
-
-## Custom domain (`rivexapp.com`)
-
-This repo already includes a `CNAME` file with:
-
-```
-rivexapp.com
-```
-
-1. In **Settings → Pages → Custom domain**, add `rivexapp.com`.
-2. After DNS verifies, enable **Enforce HTTPS**.
-
-## Wix DNS cutover
-
-Point DNS away from Wix only after the github.io preview looks good.
-
-### Apex (`rivexapp.com`) — A records
-
-| Type | Host | Value |
-|------|------|-------|
-| A | `@` | `185.199.108.153` |
-| A | `@` | `185.199.109.153` |
-| A | `@` | `185.199.110.153` |
-| A | `@` | `185.199.111.153` |
-
-### Apex — AAAA records (IPv6)
-
-| Type | Host | Value |
-|------|------|-------|
-| AAAA | `@` | `2606:50c0:8000::153` |
-| AAAA | `@` | `2606:50c0:8001::153` |
-| AAAA | `@` | `2606:50c0:8002::153` |
-| AAAA | `@` | `2606:50c0:8003::153` |
-
-### `www` — CNAME
-
-| Type | Host | Value |
-|------|------|-------|
-| CNAME | `www` | `chefaio-ios.github.io` |
-
-Remove or replace existing Wix A/CNAME records that conflict. DNS propagation can take from a few minutes up to 48 hours.
 
 ## Local development (mise)
 
