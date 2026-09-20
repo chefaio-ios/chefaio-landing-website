@@ -48,4 +48,4 @@ mise run jekyll-serve
 - Removes previously synced posts (those with `notion_id`) when they are no longer `Published`
 - Leaves hand-written posts without `notion_id` untouched
 
-The GitHub Action runs the same script and commits changes to `main` when posts differ.
+The GitHub Action runs the same script, **then `git add`s `_posts/` and `blog/assets/` before checking for a commit**. Untracked new posts do not appear in `git diff`, so checking first used to exit 0 with "No changes to commit" while dropping brand-new Published files. The job now fails if Published pages from Notion do not all write successfully.
