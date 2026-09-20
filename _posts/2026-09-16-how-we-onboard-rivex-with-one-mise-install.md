@@ -131,11 +131,10 @@ A few things production (and impatient teammates) taught us that the design alon
 | Open the generated Xcode workspace | Builds against the same Tuist graph the team expects |
 
 - **One entry point beats a wiki.** If setup is not in version control, it will drift.
+- **One owner for pin bumps.** When someone changes a version in `mise.toml`, it goes through normal PR review; everyone else re-runs `mise install`.
 - **Pin tools, then automate side effects.** mise handles versions — Tuist, SwiftLint, SwiftFormat, and friends — postinstall handles the rest.
 - **Hide Tuist ceremony on day zero.** Reach for `tuist generate` directly only when you are changing project structure.
 
 Next up in this series: why we wrap build and test behind `mise build` and `mise test` instead of raw `xcodebuild` flags — same philosophy, different layer.
 
----
-
-If reproducible dev environments matter to you, [try Rivex on the App Store](https://apps.apple.com/app/rivex/id6752362984) — we built the app the same way we built the repo.
+If you like how we run agent-ready iOS setups, [try Rivex on the App Store](https://apps.apple.com/app/rivex/id6752362984) — we built the product with the same discipline we use to build the repo.
