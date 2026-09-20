@@ -115,7 +115,7 @@ def rich_text_to_markdown(
 
 def get_property_value(properties: dict[str, Any], name: str) -> Any:
     prop = properties.get(name)
-    if not prop:
+    if not isinstance(prop, dict):
         return None
     prop_type = prop.get("type")
     if prop_type == "title":
@@ -135,6 +135,74 @@ def get_property_value(properties: dict[str, Any], name: str) -> Any:
     if prop_type == "files":
         return prop.get("files", [])
     return None
+
+
+def resolve_property_name(properties: dict[str, Any], *names: str) -> str | None:
+    if not properties:
+        return None
+    lowered = {key.lower(): key for key in properties}
+    for name in names:
+        if name in properties:
+            return name
+        key = lowered.get(name.lower())
+        if key:
+            return key
+    return None
+
+
+def lookup_property(properties: dict[str, Any], *names: str) -> Any:
+    key = resolve_property_name(properties, *names)
+    if key is None:
+        return None
+    return get_property_value(properties, key)
+
+
+def published_status_filter(database_properties: dict[str, Any]) -> dict[str, Any]:
+    status_name = resolve_property_name(database_properties, "Status")
+    if not status_name:
+        available = ", ".join(sorted(database_properties)) or "(none)"
+        print(
+            f"ERROR: Blog database has no Status property. Available properties: {available}",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
+    status_type = database_properties[status_name].get("type")
+    if status_type == "select":
+        return {"property": status_name, "select": {"equals": PUBLISHED_STATUS}}
+    if status_type == "status":
+        return {"property": status_name, "status": {"equals": PUBLISHED_STATUS}}
+    print(
+        f"ERROR: Status property {status_name!r} has unsupported type {status_type!r}; "
+        "expected select or status.",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+
+def page_log_line(page: dict[str, Any]) -> str:
+    properties = page.get("properties", {})
+    title = lookup_property(properties, "Name") or "(untitled)"
+    slug = lookup_property(properties, "Slug") or "(missing slug)"
+    post_date = lookup_property(properties, "Date") or "(missing date)"
+    return f"{page.get('id', 'unknown')} | {title} | slug={slug} | date={post_date}"
+
+
+def require_complete_export(
+    published_count: int,
+    written_count: int,
+    failures: list[str],
+) -> None:
+    if failures:
+        print(
+            "ERROR: Failed to export Published page(s):\n  " + "\n  ".join(failures),
+            file=sys.stderr,
+        )
+    if written_count != published_count or failures:
+        print(
+            f"ERROR: Published count ({published_count}) does not match written posts ({written_count}).",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
 
 
 def parse_post_date(value: str | None) -> date:
@@ -404,17 +472,15 @@ def build_post(
 ) -> PostData:
     properties = page.get("properties", {})
     notion_id = page["id"]
-    title = get_property_value(properties, "Name") or "Untitled"
-    slug_value = get_property_value(properties, "Slug")
+    title = lookup_property(properties, "Name") or "Untitled"
+    slug_value = lookup_property(properties, "Slug")
     slug = slugify(slug_value or title)
-    post_date = parse_post_date(get_property_value(properties, "Date"))
-    author = get_property_value(properties, "Author") or "Rivex Team"
-    description = get_property_value(properties, "Description") or title
-    canonical = get_property_value(properties, "Canonical url") or get_property_value(
-        properties, "Canonical"
-    )
-    tags = get_property_value(properties, "Tags") or []
-    cover_files = get_property_value(properties, "Cover") or []
+    post_date = parse_post_date(lookup_property(properties, "Date"))
+    author = lookup_property(properties, "Author") or "Rivex Team"
+    description = lookup_property(properties, "Description") or title
+    canonical = lookup_property(properties, "Canonical url", "Canonical")
+    tags = lookup_property(properties, "Tags") or []
+    cover_files = lookup_property(properties, "Cover") or []
     image = download_cover_image(session, notion_token, notion_id, cover_files)
     converter = BlockConverter(session, notion_token, notion_id)
     body = converter.convert_blocks(client, notion_id)
@@ -502,14 +568,23 @@ def remove_stale_posts(published_ids: set[str], existing: dict[str, Path]) -> li
     return removed
 
 
-def query_published_pages(client: Client, database_id: str) -> list[dict[str, Any]]:
+def retrieve_database_properties(client: Client, database_id: str) -> dict[str, Any]:
+    database = client.databases.retrieve(database_id=database_id)
+    return database.get("properties", {})
+
+
+def query_published_pages(
+    client: Client,
+    database_id: str,
+    query_filter: dict[str, Any],
+) -> list[dict[str, Any]]:
     pages: list[dict[str, Any]] = []
     cursor: str | None = None
     while True:
         response = client.databases.query(
             database_id=database_id,
             start_cursor=cursor,
-            filter={"property": "Status", "select": {"equals": PUBLISHED_STATUS}},
+            filter=query_filter,
         )
         pages.extend(response.get("results", []))
         if not response.get("has_more"):
@@ -525,33 +600,46 @@ def sync_posts() -> int:
     session = requests.Session()
 
     try:
-        pages = query_published_pages(client, database_id)
+        database_properties = retrieve_database_properties(client, database_id)
+        query_filter = published_status_filter(database_properties)
+        pages = query_published_pages(client, database_id, query_filter)
     except APIResponseError as exc:
         print(f"ERROR: Notion API request failed: {exc}", file=sys.stderr)
         sys.exit(1)
+
+    print(f"Published pages in Notion: {len(pages)}")
+    for page in pages:
+        print(f"  {page_log_line(page)}")
 
     existing = load_existing_notion_posts()
     published_ids = {page["id"] for page in pages}
     removed = remove_stale_posts(published_ids, existing)
     written: list[Path] = []
+    failures: list[str] = []
 
     for page in pages:
-        post = build_post(client, session, notion_token, page)
-        previous_path = existing.get(post.notion_id)
-        target = write_post(post)
-        if previous_path and previous_path.resolve() != target.resolve() and previous_path.exists():
-            previous_path.unlink(missing_ok=True)
-            removed.append(previous_path)
-        written.append(target)
-        existing[post.notion_id] = target
+        try:
+            post = build_post(client, session, notion_token, page)
+            previous_path = existing.get(post.notion_id)
+            target = write_post(post)
+            if previous_path and previous_path.resolve() != target.resolve() and previous_path.exists():
+                previous_path.unlink(missing_ok=True)
+                removed.append(previous_path)
+            written.append(target)
+            existing[post.notion_id] = target
+            print(
+                f"  wrote {target.relative_to(REPO_ROOT)} "
+                f"[{post.notion_id}] {post.title}"
+            )
+        except Exception as exc:  # noqa: BLE001 - fail the job after logging every page
+            failures.append(f"{page_log_line(page)} :: {exc}")
+            print(f"ERROR: Failed to export page: {page_log_line(page)}: {exc}", file=sys.stderr)
 
-    print(f"Published pages in Notion: {len(pages)}")
     print(f"Posts written/updated: {len(written)}")
     print(f"Posts removed: {len(removed)}")
-    for path in written:
-        print(f"  wrote {path.relative_to(REPO_ROOT)}")
     for path in removed:
         print(f"  removed {path.relative_to(REPO_ROOT)}")
+    require_complete_export(len(pages), len(written), failures)
     return len(written) + len(removed)
 
 
