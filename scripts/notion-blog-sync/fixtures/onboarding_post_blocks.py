@@ -79,6 +79,22 @@ def onboarding_snippet_blocks() -> list[dict[str, Any]]:
             "type": "bulleted_list_item",
             "bulleted_list_item": {"rich_text": [rt("One entry point beats a wiki.", bold=True)]},
         },
+        {
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [rt("Next up in this series: why we wrap build and test behind mise build.")],
+            },
+        },
+        {
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [
+                    rt("If you like how we run agent-ready iOS setups, "),
+                    rt("try Rivex on the App Store", href="https://apps.apple.com/app/rivex/id6752362984"),
+                    rt("."),
+                ],
+            },
+        },
     ]
 
 
