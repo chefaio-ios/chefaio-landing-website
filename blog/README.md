@@ -2,6 +2,8 @@
 
 The marketing blog lives at **https://rivexapp.com/blog/** and is built with [Jekyll](https://jekyllrb.com/) on GitHub Pages.
 
+**Published articles** are managed in Notion and synced into `_posts/` automatically. See **[NOTION.md](./NOTION.md)** for the CMS workflow, property mapping, and how to trigger a sync. The steps below still apply to hand-written posts that are not managed by Notion.
+
 ## Add a new post
 
 1. Create a Markdown file in **`_posts/`** at the repo root.
