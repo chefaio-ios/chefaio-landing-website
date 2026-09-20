@@ -251,7 +251,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .how .cloud-divider {
   background-image: url('../assets/wix-cloud-3.svg');
 }
-.download .cloud-divider--footer {
+.cloud-divider--footer {
   background-image: url('../assets/wix-cloud-4.svg');
   background-color: transparent;
 }
