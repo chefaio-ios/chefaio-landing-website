@@ -31,12 +31,23 @@ SMART_QUOTE_MAP = {
     "\u2018": "'",
     "\u2019": "'",
 }
+LAYER_HEADING_RE = re.compile(r"^Layer\s+\d+\s+—", re.IGNORECASE)
 
 
 def normalize_smart_quotes(text: str) -> str:
     for source, target in SMART_QUOTE_MAP.items():
         text = text.replace(source, target)
     return text
+
+
+def rich_text_plain(rich_text: list[dict[str, Any]]) -> str:
+    return normalize_smart_quotes(
+        "".join(item.get("plain_text", "") for item in rich_text),
+    ).strip()
+
+
+def is_layer_heading_paragraph(rich_text: list[dict[str, Any]]) -> bool:
+    return bool(LAYER_HEADING_RE.match(rich_text_plain(rich_text)))
 
 
 @dataclass
@@ -241,8 +252,12 @@ class BlockConverter:
             payload = block.get(block_type, {})
 
             if block_type == "paragraph":
-                text = rich_text_to_markdown(payload.get("rich_text", []))
-                emit_block(f"{prefix}{text}" if text else "")
+                rich_text = payload.get("rich_text", [])
+                text = rich_text_to_markdown(rich_text)
+                if text and is_layer_heading_paragraph(rich_text):
+                    emit_block(f"{prefix}### {text}")
+                else:
+                    emit_block(f"{prefix}{text}" if text else "")
             elif block_type in {"heading_1", "heading_2", "heading_3"}:
                 level = {"heading_1": "#", "heading_2": "##", "heading_3": "###"}[block_type]
                 text = rich_text_to_markdown(payload.get("rich_text", []), strip_bold=True)

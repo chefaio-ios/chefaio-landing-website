@@ -9,6 +9,7 @@ from unittest.mock import MagicMock
 
 from sync import (
     BlockConverter,
+    is_layer_heading_paragraph,
     normalize_smart_quotes,
     rich_text_to_markdown,
 )
@@ -20,6 +21,7 @@ def rt(
     bold: bool = False,
     code: bool = False,
     italic: bool = False,
+    href: str | None = None,
 ) -> dict[str, Any]:
     return {
         "plain_text": text,
@@ -30,7 +32,7 @@ def rt(
             "strikethrough": False,
             "underline": False,
         },
-        "href": None,
+        "href": href,
     }
 
 
@@ -77,6 +79,19 @@ class RichTextTests(unittest.TestCase):
         self.assertEqual(
             rich_text_to_markdown(rich_text, strip_bold=True),
             "What `mise install` actually does",
+        )
+
+    def test_layer_heading_paragraph_detection(self) -> None:
+        layer = [
+            rt("Layer 2 — postinstall hook (", bold=True),
+            rt("mise.toml", code=True),
+            rt(" → ", bold=True),
+            rt("[hooks]", code=True),
+            rt(")", bold=True),
+        ]
+        self.assertTrue(is_layer_heading_paragraph(layer))
+        self.assertFalse(
+            is_layer_heading_paragraph([rt("Expected:", bold=True), rt(" mise downloads tools.")]),
         )
 
 
@@ -175,6 +190,53 @@ class BlockConverterTests(unittest.TestCase):
         )
         self.assertIn("## Principles\n\nNext up in this series.", markdown)
 
+    def test_layer_paragraph_promoted_to_h3(self) -> None:
+        converter, client = self._converter({})
+        markdown = converter._render_blocks(
+            client,
+            [
+                {
+                    "type": "paragraph",
+                    "paragraph": {
+                        "rich_text": [
+                            rt("Layer 1 — pinned tools (", bold=True),
+                            rt("mise.toml", code=True),
+                            rt(" → ", bold=True),
+                            rt("[tools]", code=True),
+                            rt(")", bold=True),
+                        ],
+                    },
+                },
+                {
+                    "type": "paragraph",
+                    "paragraph": {"rich_text": [rt("A typical iOS mise.toml example:")]},
+                },
+            ],
+        )
+        self.assertIn(
+            "### Layer 1 — pinned tools (`mise.toml` → `[tools]`)\n\nA typical iOS mise.toml example:",
+            markdown,
+        )
+        self.assertNotIn("**Layer 1", markdown)
+
+    def test_expected_label_stays_bold_paragraph(self) -> None:
+        converter, client = self._converter({})
+        markdown = converter._render_blocks(
+            client,
+            [
+                {
+                    "type": "paragraph",
+                    "paragraph": {
+                        "rich_text": [
+                            rt("Expected:", bold=True),
+                            rt(" mise downloads and activates the pinned tools."),
+                        ],
+                    },
+                },
+            ],
+        )
+        self.assertEqual(markdown, "**Expected:** mise downloads and activates the pinned tools.")
+
     def test_numbered_list_closes_before_paragraph(self) -> None:
         converter, client = self._converter({})
         markdown = converter._render_blocks(
@@ -209,7 +271,7 @@ class BlockConverterTests(unittest.TestCase):
         markdown = converter._render_blocks(client, onboarding_snippet_blocks())
 
         self.assertIn("## What `mise install` actually does", markdown)
-        self.assertIn("Layer 1 — pinned tools (`mise.toml` → `[tools]`)", markdown)
+        self.assertIn("### Layer 1 — pinned tools (`mise.toml` → `[tools]`)", markdown)
         self.assertNotIn("****", markdown)
         self.assertIn('tuist = "4.48.2"', markdown)
         self.assertIn('swiftlint = "0.57.0"', markdown)
@@ -223,6 +285,11 @@ class BlockConverterTests(unittest.TestCase):
             "| Repo config is allowed to run on your machine |\n\n- **One entry point beats a wiki.**",
             markdown,
         )
+        self.assertIn(
+            "- **One entry point beats a wiki.**\n\nNext up in this series:",
+            markdown,
+        )
+        self.assertIn("try Rivex on the App Store](https://apps.apple.com/app/rivex/id6752362984)", markdown)
 
 
 if __name__ == "__main__":
