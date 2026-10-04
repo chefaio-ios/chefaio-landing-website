@@ -11,9 +11,9 @@ tags:
 - ios
 ---
 
-A shared lookup knew each stored model only as a generic type. The protocol on that type required an `id`. The lookup built its fetch with the predicate macro inside that generic, comparing the model's `id` to the id you asked for.
+A shared lookup knew each stored model only as a generic type. The protocol on that type required an `id`. The lookup built its fetch with the predicate macro inside that generic, comparing the model's `id` to the id you asked for. A predicate here is the fetch filter.
 
-That line crashed when an archived app reached predicate creation. A direct build did not show it. A debug run did not show it either.
+That line crashed when an archived app reached predicate creation. A debug run did not show it.
 
 This post covers that crash, what we think causes the archive-only failure, and the change that removed the generic macro. It is not a product behavior.
 
@@ -38,9 +38,7 @@ func existing<Model: StoredItem>(
 
 The names above are illustrative. The real code used the same shape: one generic parameter, a protocol that only required `id`, and `#Predicate` comparing that `id`.
 
-Creating that predicate is the line that crashed. The archived process reached it and trapped. The same function, built and run for debugging, did not.
-
-A direct build here means the normal debug build you run from Xcode. Archive means the archived app, then a run of that archive. Those are different binaries. The debug one did not hit this crash.
+Creating that predicate is the line that crashed. The archived process reached it and trapped.
 
 ## What we think is going on
 
@@ -67,7 +65,7 @@ let predicate = #Predicate<Model> { model in
 }
 ```
 
-That version did not hold. It is not the line that crashed, and it is not the current lookup. We are not claiming a public write-up of this attempt.
+That version still crashed when the archived app created the predicate. It is not the current lookup. We are not claiming a public write-up of this attempt.
 
 ## The fix
 
