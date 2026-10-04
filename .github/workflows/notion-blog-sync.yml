@@ -2,8 +2,11 @@ name: Notion Blog Sync
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/notion-blog-sync.yml
   schedule:
-    - cron: "0 * * * *"
+    - cron: "17 * * * *"
 
 permissions:
   contents: write
